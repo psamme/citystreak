@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CityStreak</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="noise"></div>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+
+    <main class="app-shell">
+      <header class="topbar panel">
+        <div>
+          <p class="eyebrow">CityStreak</p>
+          <h1>Guess one country from five cities. Survive as long as you can.</h1>
+        </div>
+        <nav class="topbar-nav">
+          <button class="nav-button is-active" data-view-target="game-view" type="button">Game</button>
+          <button class="nav-button" data-view-target="profile-view" type="button">Profile</button>
+          <button class="nav-button" data-view-target="share-view" type="button">Share</button>
+          <button class="ghost-button small-button" id="logout-button" type="button">Log out</button>
+        </nav>
+      </header>
+
+      <section id="auth-view" class="view auth-view">
+        <div class="auth-grid">
+          <section class="panel auth-panel auth-panel-copy">
+            <p class="eyebrow">Account system</p>
+            <h2>Build a profile, climb deeper levels, and keep a permanent country archive.</h2>
+            <p class="supporting-text">
+              This prototype uses local sign-up and login on this device. The data model is set up so it can later be moved to a real backend and shared profile system.
+            </p>
+            <div class="auth-highlights">
+              <div class="mini-card">
+                <span>Run-based mode</span>
+                <strong>1 answer box per country</strong>
+              </div>
+              <div class="mini-card">
+                <span>Profile archive</span>
+                <strong>Real map outlines saved</strong>
+              </div>
+              <div class="mini-card">
+                <span>Share output</span>
+                <strong>Exportable social card</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel auth-panel">
+            <div class="tabs">
+              <button id="show-login-button" class="tab-button is-active" type="button">Log in</button>
+              <button id="show-signup-button" class="tab-button" type="button">Sign up</button>
+            </div>
+
+            <form id="login-form" class="auth-form">
+              <label class="input-label">
+                <span>Username</span>
+                <input id="login-username" class="guess-input" type="text" required />
+              </label>
+              <label class="input-label">
+                <span>Password</span>
+                <input id="login-password" class="guess-input" type="password" required />
+              </label>
+              <button class="primary-button wide-button" type="submit">Enter CityStreak</button>
+            </form>
+
+            <form id="signup-form" class="auth-form hidden">
+              <label class="input-label">
+                <span>Username</span>
+                <input id="signup-username" class="guess-input" type="text" minlength="3" required />
+              </label>
+              <label class="input-label">
+                <span>Display name</span>
+                <input id="signup-display-name" class="guess-input" type="text" minlength="2" required />
+              </label>
+              <label class="input-label">
+                <span>Password</span>
+                <input id="signup-password" class="guess-input" type="password" minlength="4" required />
+              </label>
+              <button class="primary-button wide-button" type="submit">Create profile</button>
+            </form>
+
+            <p id="auth-message" class="feedback" aria-live="polite"></p>
+          </section>
+        </div>
+      </section>
+
+      <section id="app-view" class="view hidden">
+        <section id="game-view" class="page-view">
+          <section class="hero panel">
+            <div class="hero-copy">
+              <p class="eyebrow">Current run</p>
+              <h2 id="run-heading">Level 1</h2>
+              <p id="run-subtext" class="supporting-text"></p>
+              <div class="hero-actions">
+                <button id="next-round-button" class="primary-button" type="button">New run</button>
+              </div>
+            </div>
+            <div class="hero-badge">
+              <span>Signed in as</span>
+              <strong id="current-user-name"></strong>
+              <small id="current-user-handle"></small>
+            </div>
+          </section>
+
+          <section class="dashboard">
+            <div class="panel game-panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Five clues</p>
+                  <h3 id="difficulty-label">Easy tier</h3>
+                </div>
+                <div class="round-pill" id="score-pill">Score 0</div>
+              </div>
+
+              <div class="guess-layout">
+                <div class="clue-stack" id="clue-stack"></div>
+                <form id="country-guess-form" class="answer-panel" autocomplete="off">
+                  <label class="input-label">
+                    <span>Which country are these cities in?</span>
+                    <input
+                      id="country-guess-input"
+                      class="guess-input large-input"
+                      type="text"
+                      placeholder="Type a country name"
+                      required
+                    />
+                  </label>
+                  <button class="primary-button wide-button" type="submit">Lock guess</button>
+                  <button id="reveal-clue-button" class="ghost-button wide-button" type="button">
+                    Reveal next clue
+                  </button>
+                  <p id="guess-feedback" class="feedback large-feedback" aria-live="polite"></p>
+                </form>
+              </div>
+            </div>
+
+            <aside class="sidebar">
+              <section class="panel map-panel">
+                <div class="panel-header compact">
+                  <div>
+                    <p class="eyebrow">Map progress</p>
+                    <h3>Unlocked countries</h3>
+                  </div>
+                </div>
+                <div id="map" class="map-frame" aria-label="World map"></div>
+              </section>
+
+              <section class="panel stats-panel">
+                <div class="panel-header compact">
+                  <div>
+                    <p class="eyebrow">Run stats</p>
+                    <h3>Current session</h3>
+                  </div>
+                </div>
+                <div id="run-stats-grid" class="stats-grid"></div>
+              </section>
+            </aside>
+          </section>
+        </section>
+
+        <section id="profile-view" class="page-view hidden">
+          <section class="panel profile-hero">
+            <div>
+              <p class="eyebrow">Public profile</p>
+              <h2 id="profile-title"></h2>
+              <p id="profile-subtitle" class="supporting-text"></p>
+            </div>
+            <div class="hero-badge">
+              <span>Rank</span>
+              <strong id="profile-rank"></strong>
+              <small id="profile-country-count"></small>
+            </div>
+          </section>
+
+          <section class="profile-layout">
+            <div class="panel profile-stats-panel">
+              <div class="panel-header compact">
+                <div>
+                  <p class="eyebrow">Lifetime stats</p>
+                  <h3>Account performance</h3>
+                </div>
+              </div>
+              <div id="profile-stats-grid" class="stats-grid"></div>
+            </div>
+
+            <div class="panel share-history-panel">
+              <div class="panel-header compact">
+                <div>
+                  <p class="eyebrow">Latest run</p>
+                  <h3>Share preview</h3>
+                </div>
+              </div>
+              <canvas id="share-canvas" width="1200" height="675" class="share-canvas"></canvas>
+              <div class="hero-actions top-gap">
+                <button id="download-share-button" class="primary-button" type="button">Download share image</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel full-profile-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Country archive</p>
+                <h3>Real country outlines</h3>
+              </div>
+            </div>
+            <div id="country-outline-gallery" class="country-outline-gallery"></div>
+          </section>
+        </section>
+
+        <section id="share-view" class="page-view hidden">
+          <section class="panel share-page-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Share your run</p>
+                <h3>Clean export for friends or social</h3>
+              </div>
+            </div>
+            <p class="supporting-text">
+              This card uses your latest run, including countries you cleared and some of the city clues that got you there.
+            </p>
+            <canvas id="share-canvas-secondary" width="1200" height="675" class="share-canvas large-share"></canvas>
+            <div class="hero-actions top-gap">
+              <button id="download-share-button-secondary" class="primary-button" type="button">Download PNG</button>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <div id="outline-source-map" class="outline-source-map" aria-hidden="true"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
