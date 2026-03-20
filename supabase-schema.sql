@@ -28,11 +28,12 @@ before update on public.profiles
 for each row
 execute procedure public.handle_profiles_updated_at();
 
+drop policy if exists "users can read their own profile" on public.profiles;
 drop policy if exists "profiles are publicly readable" on public.profiles;
-create policy "profiles are publicly readable"
+create policy "users can read their own profile"
 on public.profiles
 for select
-using (true);
+using (auth.uid() = id);
 
 drop policy if exists "users can insert their own profile" on public.profiles;
 create policy "users can insert their own profile"

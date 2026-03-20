@@ -38,6 +38,8 @@ This repo is ready to deploy as a static site.
 4. In Supabase Auth, enable Email auth.
 5. Serve or deploy the site normally.
 
+The schema is set up so users can only read and update their own `profiles` row.
+
 ### Vercel
 
 1. Import the GitHub repo into Vercel.
