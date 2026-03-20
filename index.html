@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CityStreak</title>
+    <title>GeoStreak</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -24,23 +24,24 @@
     <main class="app-shell">
       <header class="topbar panel">
         <div>
-          <p class="eyebrow">CityStreak</p>
+          <p class="eyebrow">GeoStreak</p>
           <h1>Guess one country from five cities. Survive as long as you can.</h1>
         </div>
         <nav class="topbar-nav">
           <button class="nav-button is-active" data-view-target="game-view" type="button">Game</button>
           <button class="nav-button" data-view-target="profile-view" type="button">Profile</button>
+          <button class="primary-button small-button" id="account-entry-button" type="button">Create account / Sign in</button>
           <button class="ghost-button small-button" id="logout-button" type="button">Log out</button>
         </nav>
       </header>
 
-      <section id="auth-view" class="view auth-view">
+      <section id="auth-view" class="view auth-view hidden">
         <div class="auth-grid">
           <section class="panel auth-panel auth-panel-copy">
             <p class="eyebrow">Account system</p>
             <h2>Build a profile, climb deeper levels, and keep a permanent country archive.</h2>
             <p class="supporting-text">
-              Create an account to track your streak, unlock country outlines, and build your geography archive. Your progress is saved on this device.
+              Create an account to track your streak, unlock country outlines, and keep your geography archive synced across sessions.
             </p>
             <div class="auth-highlights">
               <div class="mini-card">
@@ -52,13 +53,16 @@
                 <strong>Real map outlines saved</strong>
               </div>
               <div class="mini-card">
-                <span>Share output</span>
-                <strong>Exportable social card</strong>
+                <span>Saved progress</span>
+                <strong>Backed by Supabase</strong>
               </div>
             </div>
           </section>
 
           <section class="panel auth-panel">
+            <div class="auth-actions">
+              <button id="close-auth-button" class="ghost-button small-button" type="button">Back to game</button>
+            </div>
             <div class="tabs">
               <button id="show-login-button" class="tab-button is-active" type="button">Log in</button>
               <button id="show-signup-button" class="tab-button" type="button">Sign up</button>
@@ -66,17 +70,21 @@
 
             <form id="login-form" class="auth-form">
               <label class="input-label">
-                <span>Username</span>
-                <input id="login-username" class="guess-input" type="text" required />
+                <span>Email</span>
+                <input id="login-email" class="guess-input" type="email" required autocomplete="email" />
               </label>
               <label class="input-label">
                 <span>Password</span>
                 <input id="login-password" class="guess-input" type="password" required />
               </label>
-              <button class="primary-button wide-button" type="submit">Enter CityStreak</button>
+              <button class="primary-button wide-button" type="submit">Enter GeoStreak</button>
             </form>
 
             <form id="signup-form" class="auth-form hidden">
+              <label class="input-label">
+                <span>Email</span>
+                <input id="signup-email" class="guess-input" type="email" required autocomplete="email" />
+              </label>
               <label class="input-label">
                 <span>Username</span>
                 <input id="signup-username" class="guess-input" type="text" minlength="3" required autocomplete="username" />
@@ -104,34 +112,57 @@
       <section id="app-view" class="view hidden">
         <section id="game-view" class="page-view">
           <section class="dashboard">
-            <div class="panel game-panel">
-              <div class="panel-header">
-                <div>
-                  <p class="eyebrow">Five clues</p>
-                  <h3 id="difficulty-label">Easy tier</h3>
+            <div class="panel game-panel" id="game-panel">
+              <div class="panel-header game-panel-header">
+                <div class="game-panel-copy">
+                  <p class="eyebrow">Current run</p>
+                  <h3 id="run-heading">Level 1</h3>
+                  <p id="run-subtext" class="supporting-text"></p>
                 </div>
-                <div class="round-pill" id="score-pill">Score 0</div>
+                <div class="game-panel-actions">
+                  <div class="round-pill" id="score-pill">Score 0</div>
+                  <button id="next-round-button" class="primary-button" type="button">New run</button>
+                </div>
+              </div>
+
+              <div class="round-progress round-progress-top" aria-live="polite">
+                <div class="round-progress-copy">
+                  <span>Streak</span>
+                  <strong id="round-progress-label">0 rounds cleared</strong>
+                </div>
+                <div class="round-progress-track">
+                  <div id="round-progress-fill" class="round-progress-fill"></div>
+                </div>
               </div>
 
               <div class="guess-layout" id="guess-layout">
-                <div class="clue-stack" id="clue-stack"></div>
-                <form id="country-guess-form" class="answer-panel" autocomplete="off">
-                  <label class="input-label">
-                    <span>Which country are these cities in?</span>
-                    <input
-                      id="country-guess-input"
-                      class="guess-input large-input"
-                      type="text"
-                      placeholder="Type a country name"
-                      required
-                    />
-                  </label>
-                  <button class="primary-button wide-button" type="submit">Lock guess</button>
-                  <button id="reveal-clue-button" class="ghost-button wide-button" type="button">
-                    Reveal next clue
-                  </button>
-                  <p id="guess-feedback" class="feedback large-feedback" aria-live="polite"></p>
-                </form>
+                <div class="clue-column">
+                  <div class="clue-stack" id="clue-stack"></div>
+                </div>
+                <div class="guess-side">
+                  <form id="country-guess-form" class="answer-panel" autocomplete="off">
+                    <div id="answer-panel-effects" class="answer-panel-effects" aria-hidden="true"></div>
+                    <label class="input-label">
+                      <span>Which country are these cities in?</span>
+                      <input
+                        id="country-guess-input"
+                        class="guess-input large-input"
+                        type="text"
+                        placeholder="Type a country name"
+                        required
+                      />
+                    </label>
+                    <p id="country-preview" class="input-preview"></p>
+                    <div id="country-suggestions" class="country-suggestions hidden" aria-live="polite"></div>
+                    <div class="answer-actions">
+                      <button class="primary-button wide-button primary-guess-button" type="submit">Lock guess</button>
+                    </div>
+                    <p id="guess-feedback" class="feedback large-feedback" aria-live="polite"></p>
+                  </form>
+                  <div class="game-map-dock">
+                    <div id="game-map" class="map-frame game-map-frame" aria-label="Run map"></div>
+                  </div>
+                </div>
               </div>
 
               <div id="lost-screen" class="lost-screen hidden">
@@ -145,56 +176,9 @@
                   </div>
                 </div>
                 <div class="lost-outline" id="lost-country-outline"></div>
-                <div class="lost-share">
-                  <canvas id="share-canvas" width="1200" height="675" class="share-canvas"></canvas>
-                  <div class="hero-actions top-gap">
-                    <button id="download-share-button" class="primary-button" type="button">Download share image</button>
-                  </div>
-                </div>
               </div>
             </div>
-
-            <aside class="sidebar">
-              <section class="panel map-panel">
-                <div class="panel-header compact">
-                  <div>
-                    <p class="eyebrow">Map progress</p>
-                    <h3>Unlocked countries</h3>
-                  </div>
-                </div>
-                <div id="map" class="map-frame" aria-label="World map"></div>
-              </section>
-            </aside>
           </section>
-
-          <div class="run-footer">
-            <section class="hero panel">
-              <div class="hero-copy">
-                <p class="eyebrow">Current run</p>
-                <h2 id="run-heading">Level 1</h2>
-                <p id="run-subtext" class="supporting-text"></p>
-                <div class="hero-actions">
-                  <button id="next-round-button" class="primary-button" type="button">New run</button>
-                </div>
-              </div>
-              <div class="hero-badge">
-                <span>Signed in as</span>
-                <strong id="current-user-name"></strong>
-                <small id="current-user-handle"></small>
-              </div>
-            </section>
-
-            <section class="panel stats-panel">
-              <div class="panel-header compact">
-                <div>
-                  <p class="eyebrow">Run stats</p>
-                  <h3>Current session</h3>
-                </div>
-              </div>
-              <div id="run-stats-grid" class="stats-grid"></div>
-              <div id="sidebar-outline-gallery" class="sidebar-outline-gallery"></div>
-            </section>
-          </div>
         </section>
 
         <section id="profile-view" class="page-view hidden">
@@ -221,6 +205,16 @@
               </div>
               <div id="profile-stats-grid" class="stats-grid"></div>
             </div>
+
+            <div class="panel map-panel profile-map-panel">
+              <div class="panel-header compact">
+                <div>
+                  <p class="eyebrow">Map progress</p>
+                  <h3>Unlocked countries</h3>
+                </div>
+              </div>
+              <div id="map" class="map-frame" aria-label="World map"></div>
+            </div>
           </section>
 
           <section class="panel full-profile-panel">
@@ -241,6 +235,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./supabase-config.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>
