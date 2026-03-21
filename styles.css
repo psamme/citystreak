@@ -215,8 +215,7 @@ h3 {
 }
 
 .auth-grid,
-.dashboard,
-.profile-layout {
+.dashboard {
   display: grid;
   gap: 20px;
 }
@@ -230,12 +229,6 @@ h3 {
   gap: 20px;
 }
 
-.profile-layout {
-  grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
-  margin-top: 20px;
-  gap: 18px;
-}
-
 .auth-panel,
 .hero,
 .game-panel,
@@ -243,7 +236,6 @@ h3 {
 .run-panel,
 .stats-panel,
 .profile-hero,
-.profile-stats-panel,
 .full-profile-panel {
   padding: 28px;
 }
@@ -386,6 +378,18 @@ h3 {
   display: grid;
   justify-items: end;
   gap: 12px;
+}
+
+.daily-toolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: end;
+  margin: 18px 0 22px;
+}
+
+.daily-toolbar .supporting-text {
+  margin: 0 0 6px;
 }
 
 .round-pill {
@@ -1036,6 +1040,18 @@ h3 {
   vector-effect: non-scaling-stroke;
 }
 
+.win-outline {
+  border-color: rgba(105, 227, 255, 0.2);
+  background:
+    radial-gradient(circle at center, rgba(105, 227, 255, 0.14), transparent 64%),
+    rgba(255, 255, 255, 0.02);
+}
+
+.win-outline path {
+  fill: rgba(105, 227, 255, 0.1);
+  stroke: var(--accent);
+}
+
 button:hover {
   transform: translateY(-1px);
 }
@@ -1417,6 +1433,10 @@ button:active {
   .game-panel-actions {
     justify-items: stretch;
   }
+
+  .daily-toolbar {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 760px) {
@@ -1433,7 +1453,6 @@ button:active {
   .run-panel,
   .stats-panel,
   .profile-hero,
-  .profile-stats-panel,
   .full-profile-panel {
     padding: 20px;
     border-radius: 24px;

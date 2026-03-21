@@ -1,115 +1,426 @@
-const COUNTRY_ROUNDS = [
+const DAILY_START_DATE = "2026-03-20";
+const DAILY_RUN_LENGTH = 10;
+
+const DAILY_ROUNDS = [
   {
+    id: "day-1-jp",
     country: "Japan",
     code: "JP",
     tier: "Easy",
-    level: 1,
     cities: ["Tokyo", "Osaka", "Kyoto", "Sapporo", "Nagoya"]
   },
   {
+    id: "day-2-it",
     country: "Italy",
     code: "IT",
     tier: "Easy",
-    level: 2,
     cities: ["Rome", "Milan", "Naples", "Turin", "Palermo"]
   },
   {
+    id: "day-3-br",
     country: "Brazil",
     code: "BR",
     tier: "Easy",
-    level: 3,
     cities: ["Sao Paulo", "Rio de Janeiro", "Brasilia", "Salvador", "Recife"]
   },
   {
+    id: "day-4-tr",
     country: "Turkey",
     code: "TR",
     tier: "Easy",
-    level: 4,
     cities: ["Istanbul", "Ankara", "Izmir", "Bursa", "Antalya"]
   },
   {
+    id: "day-5-ma",
     country: "Morocco",
     code: "MA",
     tier: "Medium",
-    level: 5,
     cities: ["Casablanca", "Fez", "Marrakesh", "Tangier", "Oujda"]
   },
   {
+    id: "day-6-ro",
     country: "Romania",
     code: "RO",
     tier: "Medium",
-    level: 6,
     cities: ["Bucharest", "Cluj-Napoca", "Timisoara", "Iasi", "Constanta"]
   },
   {
+    id: "day-7-kz",
     country: "Kazakhstan",
     code: "KZ",
     tier: "Medium",
-    level: 7,
     cities: ["Almaty", "Astana", "Shymkent", "Aktobe", "Karaganda"]
   },
   {
+    id: "day-8-kh",
     country: "Cambodia",
     code: "KH",
     tier: "Medium",
-    level: 8,
     cities: ["Phnom Penh", "Siem Reap", "Battambang", "Kampot", "Sihanoukville"]
   },
   {
+    id: "day-9-kg",
     country: "Kyrgyzstan",
     code: "KG",
     tier: "Hard",
-    level: 9,
     cities: ["Bishkek", "Osh", "Karakol", "Jalal-Abad", "Naryn"]
   },
   {
+    id: "day-10-md",
     country: "Moldova",
     code: "MD",
     tier: "Hard",
-    level: 10,
     cities: ["Chisinau", "Balti", "Cahul", "Orhei", "Soroca"]
   },
   {
+    id: "day-11-la",
     country: "Laos",
     code: "LA",
     tier: "Hard",
-    level: 11,
     cities: ["Vientiane", "Luang Prabang", "Pakse", "Savannakhet", "Vang Vieng"]
   },
   {
+    id: "day-12-bf",
     country: "Burkina Faso",
     code: "BF",
     tier: "Hard",
-    level: 12,
     cities: ["Ouagadougou", "Bobo-Dioulasso", "Koudougou", "Ouahigouya", "Banfora"]
   },
   {
+    id: "day-13-uz",
     country: "Uzbekistan",
     code: "UZ",
     tier: "Expert",
-    level: 13,
     cities: ["Tashkent", "Samarkand", "Bukhara", "Andijan", "Nukus"]
   },
   {
+    id: "day-14-na",
     country: "Namibia",
     code: "NA",
     tier: "Expert",
-    level: 14,
     cities: ["Windhoek", "Walvis Bay", "Swakopmund", "Luderitz", "Otjiwarongo"]
   },
   {
+    id: "day-15-tj",
     country: "Tajikistan",
     code: "TJ",
     tier: "Expert",
-    level: 15,
     cities: ["Dushanbe", "Khujand", "Kulob", "Bokhtar", "Khorog"]
   },
   {
+    id: "day-16-al",
     country: "Albania",
     code: "AL",
     tier: "Expert",
-    level: 16,
     cities: ["Tirana", "Durres", "Shkoder", "Vlore", "Gjirokaster"]
+  },
+  {
+    id: "day-17-pt",
+    country: "Portugal",
+    code: "PT",
+    tier: "Easy",
+    cities: ["Lisbon", "Porto", "Braga", "Coimbra", "Faro"]
+  },
+  {
+    id: "day-18-th",
+    country: "Thailand",
+    code: "TH",
+    tier: "Easy",
+    cities: ["Bangkok", "Chiang Mai", "Phuket", "Pattaya", "Khon Kaen"]
+  },
+  {
+    id: "day-19-eg",
+    country: "Egypt",
+    code: "EG",
+    tier: "Easy",
+    cities: ["Cairo", "Alexandria", "Giza", "Luxor", "Aswan"]
+  },
+  {
+    id: "day-20-za",
+    country: "South Africa",
+    code: "ZA",
+    tier: "Easy",
+    cities: ["Johannesburg", "Cape Town", "Durban", "Pretoria", "Port Elizabeth"]
+  },
+  {
+    id: "day-21-ar",
+    country: "Argentina",
+    code: "AR",
+    tier: "Easy",
+    cities: ["Buenos Aires", "Cordoba", "Rosario", "Mendoza", "La Plata"]
+  },
+  {
+    id: "day-22-in",
+    country: "India",
+    code: "IN",
+    tier: "Easy",
+    cities: ["Mumbai", "Delhi", "Bengaluru", "Chennai", "Kolkata"]
+  },
+  {
+    id: "day-23-id",
+    country: "Indonesia",
+    code: "ID",
+    tier: "Easy",
+    cities: ["Jakarta", "Surabaya", "Bandung", "Medan", "Yogyakarta"]
+  },
+  {
+    id: "day-24-ca",
+    country: "Canada",
+    code: "CA",
+    tier: "Easy",
+    cities: ["Toronto", "Montreal", "Vancouver", "Calgary", "Ottawa"]
+  },
+  {
+    id: "day-25-es",
+    country: "Spain",
+    code: "ES",
+    tier: "Easy",
+    cities: ["Madrid", "Barcelona", "Valencia", "Seville", "Bilbao"]
+  },
+  {
+    id: "day-26-de",
+    country: "Germany",
+    code: "DE",
+    tier: "Easy",
+    cities: ["Berlin", "Hamburg", "Munich", "Cologne", "Frankfurt"]
+  },
+  {
+    id: "day-27-mx",
+    country: "Mexico",
+    code: "MX",
+    tier: "Easy",
+    cities: ["Mexico City", "Guadalajara", "Monterrey", "Puebla", "Merida"]
+  },
+  {
+    id: "day-28-vn",
+    country: "Vietnam",
+    code: "VN",
+    tier: "Easy",
+    cities: ["Hanoi", "Ho Chi Minh City", "Da Nang", "Hue", "Can Tho"]
+  },
+  {
+    id: "day-29-pl",
+    country: "Poland",
+    code: "PL",
+    tier: "Medium",
+    cities: ["Warsaw", "Krakow", "Gdansk", "Wroclaw", "Poznan"]
+  },
+  {
+    id: "day-30-my",
+    country: "Malaysia",
+    code: "MY",
+    tier: "Medium",
+    cities: ["Kuala Lumpur", "George Town", "Johor Bahru", "Ipoh", "Kota Kinabalu"]
+  },
+  {
+    id: "day-31-pe",
+    country: "Peru",
+    code: "PE",
+    tier: "Medium",
+    cities: ["Lima", "Cusco", "Arequipa", "Trujillo", "Piura"]
+  },
+  {
+    id: "day-32-gr",
+    country: "Greece",
+    code: "GR",
+    tier: "Medium",
+    cities: ["Athens", "Thessaloniki", "Patras", "Heraklion", "Larissa"]
+  },
+  {
+    id: "day-33-sa",
+    country: "Saudi Arabia",
+    code: "SA",
+    tier: "Medium",
+    cities: ["Riyadh", "Jeddah", "Mecca", "Medina", "Dammam"]
+  },
+  {
+    id: "day-34-ph",
+    country: "Philippines",
+    code: "PH",
+    tier: "Medium",
+    cities: ["Manila", "Cebu City", "Davao", "Baguio", "Iloilo City"]
+  },
+  {
+    id: "day-35-cl",
+    country: "Chile",
+    code: "CL",
+    tier: "Medium",
+    cities: ["Santiago", "Valparaiso", "Concepcion", "Antofagasta", "Puerto Montt"]
+  },
+  {
+    id: "day-36-ke",
+    country: "Kenya",
+    code: "KE",
+    tier: "Medium",
+    cities: ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret"]
+  },
+  {
+    id: "day-37-se",
+    country: "Sweden",
+    code: "SE",
+    tier: "Medium",
+    cities: ["Stockholm", "Gothenburg", "Malmo", "Uppsala", "Linkoping"]
+  },
+  {
+    id: "day-38-np",
+    country: "Nepal",
+    code: "NP",
+    tier: "Medium",
+    cities: ["Kathmandu", "Pokhara", "Lalitpur", "Biratnagar", "Bharatpur"]
+  },
+  {
+    id: "day-39-tz",
+    country: "Tanzania",
+    code: "TZ",
+    tier: "Hard",
+    cities: ["Dar es Salaam", "Dodoma", "Arusha", "Mwanza", "Zanzibar City"]
+  },
+  {
+    id: "day-40-hr",
+    country: "Croatia",
+    code: "HR",
+    tier: "Hard",
+    cities: ["Zagreb", "Split", "Rijeka", "Osijek", "Dubrovnik"]
+  },
+  {
+    id: "day-41-jo",
+    country: "Jordan",
+    code: "JO",
+    tier: "Hard",
+    cities: ["Amman", "Aqaba", "Irbid", "Zarqa", "Madaba"]
+  },
+  {
+    id: "day-42-ec",
+    country: "Ecuador",
+    code: "EC",
+    tier: "Hard",
+    cities: ["Quito", "Guayaquil", "Cuenca", "Loja", "Manta"]
+  },
+  {
+    id: "day-43-gh",
+    country: "Ghana",
+    code: "GH",
+    tier: "Hard",
+    cities: ["Accra", "Kumasi", "Takoradi", "Tamale", "Cape Coast"]
+  },
+  {
+    id: "day-44-fi",
+    country: "Finland",
+    code: "FI",
+    tier: "Hard",
+    cities: ["Helsinki", "Turku", "Tampere", "Oulu", "Rovaniemi"]
+  },
+  {
+    id: "day-45-at",
+    country: "Austria",
+    code: "AT",
+    tier: "Hard",
+    cities: ["Vienna", "Salzburg", "Graz", "Innsbruck", "Linz"]
+  },
+  {
+    id: "day-46-rs",
+    country: "Serbia",
+    code: "RS",
+    tier: "Hard",
+    cities: ["Belgrade", "Novi Sad", "Nis", "Kragujevac", "Subotica"]
+  },
+  {
+    id: "day-47-bo",
+    country: "Bolivia",
+    code: "BO",
+    tier: "Expert",
+    cities: ["La Paz", "Santa Cruz", "Cochabamba", "Sucre", "Potosi"]
+  },
+  {
+    id: "day-48-ge",
+    country: "Georgia",
+    code: "GE",
+    tier: "Expert",
+    cities: ["Tbilisi", "Batumi", "Kutaisi", "Rustavi", "Zugdidi"]
+  },
+  {
+    id: "day-49-tn",
+    country: "Tunisia",
+    code: "TN",
+    tier: "Expert",
+    cities: ["Tunis", "Sfax", "Sousse", "Kairouan", "Bizerte"]
+  },
+  {
+    id: "day-50-lk",
+    country: "Sri Lanka",
+    code: "LK",
+    tier: "Expert",
+    cities: ["Colombo", "Kandy", "Galle", "Jaffna", "Negombo"]
+  },
+  {
+    id: "day-51-kr",
+    country: "South Korea",
+    code: "KR",
+    tier: "Expert",
+    cities: ["Seoul", "Busan", "Incheon", "Daegu", "Gwangju"]
+  },
+  {
+    id: "day-52-nl",
+    country: "Netherlands",
+    code: "NL",
+    tier: "Expert",
+    cities: ["Amsterdam", "Rotterdam", "The Hague", "Utrecht", "Eindhoven"]
+  },
+  {
+    id: "day-53-ch",
+    country: "Switzerland",
+    code: "CH",
+    tier: "Expert",
+    cities: ["Zurich", "Geneva", "Basel", "Bern", "Lausanne"]
+  },
+  {
+    id: "day-54-bd",
+    country: "Bangladesh",
+    code: "BD",
+    tier: "Expert",
+    cities: ["Dhaka", "Chittagong", "Khulna", "Rajshahi", "Sylhet"]
+  },
+  {
+    id: "day-55-be",
+    country: "Belgium",
+    code: "BE",
+    tier: "Expert",
+    cities: ["Brussels", "Antwerp", "Ghent", "Bruges", "Liege"]
+  },
+  {
+    id: "day-56-az",
+    country: "Azerbaijan",
+    code: "AZ",
+    tier: "Expert",
+    cities: ["Baku", "Ganja", "Sumqayit", "Mingachevir", "Lankaran"]
+  },
+  {
+    id: "day-57-gt",
+    country: "Guatemala",
+    code: "GT",
+    tier: "Expert",
+    cities: ["Guatemala City", "Quetzaltenango", "Antigua Guatemala", "Escuintla", "Puerto Barrios"]
+  },
+  {
+    id: "day-58-bw",
+    country: "Botswana",
+    code: "BW",
+    tier: "Expert",
+    cities: ["Gaborone", "Francistown", "Maun", "Kasane", "Serowe"]
+  },
+  {
+    id: "day-59-uy",
+    country: "Uruguay",
+    code: "UY",
+    tier: "Expert",
+    cities: ["Montevideo", "Salto", "Paysandu", "Maldonado", "Rivera"]
+  },
+  {
+    id: "day-60-cm",
+    country: "Cameroon",
+    code: "CM",
+    tier: "Expert",
+    cities: ["Yaounde", "Douala", "Garoua", "Bamenda", "Bafoussam"]
   }
 ];
 
@@ -133,7 +444,18 @@ const COUNTRY_ALIASES = {
   "uzbekistan": "Uzbekistan",
   "namibia": "Namibia",
   "tajikistan": "Tajikistan",
-  "albania": "Albania"
+  "albania": "Albania",
+  "south korea": "South Korea",
+  "republic of korea": "South Korea",
+  "netherlands": "Netherlands",
+  "switzerland": "Switzerland",
+  "bangladesh": "Bangladesh",
+  "belgium": "Belgium",
+  "azerbaijan": "Azerbaijan",
+  "guatemala": "Guatemala",
+  "botswana": "Botswana",
+  "uruguay": "Uruguay",
+  "cameroon": "Cameroon"
 };
 
 const COUNTRY_REGIONS = {
@@ -152,7 +474,51 @@ const COUNTRY_REGIONS = {
   Uzbekistan: "Central Asia",
   Namibia: "Southern Africa",
   Tajikistan: "Central Asia",
-  Albania: "Southern Europe"
+  Albania: "Southern Europe",
+  Portugal: "Southern Europe",
+  Thailand: "Southeast Asia",
+  Egypt: "North Africa",
+  "South Africa": "Southern Africa",
+  Argentina: "South America",
+  India: "South Asia",
+  Indonesia: "Southeast Asia",
+  Canada: "North America",
+  Spain: "Southern Europe",
+  Germany: "Central Europe",
+  Mexico: "North America",
+  Vietnam: "Southeast Asia",
+  Poland: "Central Europe",
+  Malaysia: "Southeast Asia",
+  Peru: "South America",
+  Greece: "Southern Europe",
+  "Saudi Arabia": "Arabian Peninsula",
+  Philippines: "Southeast Asia",
+  Chile: "South America",
+  Kenya: "East Africa",
+  Sweden: "Nordics",
+  Nepal: "South Asia",
+  Tanzania: "East Africa",
+  Croatia: "Balkans",
+  Jordan: "Middle East",
+  Ecuador: "South America",
+  Ghana: "West Africa",
+  Finland: "Nordics",
+  Austria: "Central Europe",
+  Serbia: "Balkans",
+  Bolivia: "South America",
+  Georgia: "Caucasus",
+  Tunisia: "North Africa",
+  "Sri Lanka": "South Asia",
+  "South Korea": "East Asia",
+  Netherlands: "Western Europe",
+  Switzerland: "Central Europe",
+  Bangladesh: "South Asia",
+  Belgium: "Western Europe",
+  Azerbaijan: "Caucasus",
+  Guatemala: "Central America",
+  Botswana: "Southern Africa",
+  Uruguay: "South America",
+  Cameroon: "Central Africa"
 };
 
 const COUNTRY_NAMES = [
@@ -354,32 +720,30 @@ const COUNTRY_NAMES = [
   "Estonia"
 ];
 
-const RUN_LENGTH = 10;
-
-const SUPABASE_URL = window.GEOSTREAK_SUPABASE_URL || "";
-const SUPABASE_ANON_KEY = window.GEOSTREAK_SUPABASE_ANON_KEY || "";
+const LOCAL_PROFILE_KEY = "geostreak.localProfile.v1";
 
 function defaultStats() {
   return {
     correctGuesses: 0,
     incorrectGuesses: 0,
     countriesSolved: [],
-    bestLevel: 0,
-    runsStarted: 0,
-    currentRunScore: 0,
-    currentLevel: 1,
+    bestScore: 0,
+    dailyCompleted: 0,
+    dailyHistory: {},
+    currentPuzzleScore: 0,
     latestRun: [],
-    totalRoundsCleared: 0
+    totalRoundsCleared: 0,
+    lastPlayedDate: ""
   };
 }
 
 function defaultGuest() {
   return {
-    username: "",
-    displayName: "Guest",
-    guest: true,
+    username: "localplayer",
+    displayName: "Local Player",
+    guest: false,
     email: "",
-    id: "",
+    id: "local-profile",
     stats: defaultStats()
   };
 }
@@ -403,7 +767,6 @@ const el = {
   navButtons: Array.from(document.querySelectorAll(".nav-button")),
   pageViews: Array.from(document.querySelectorAll(".page-view")),
   profileView: document.getElementById("profile-view"),
-  logoutButton: document.getElementById("logout-button"),
   runHeading: document.getElementById("run-heading"),
   runSubtext: document.getElementById("run-subtext"),
   scorePill: document.getElementById("score-pill"),
@@ -419,12 +782,13 @@ const el = {
   answerPanel: document.getElementById("country-guess-form"),
   answerPanelEffects: document.getElementById("answer-panel-effects"),
   nextRoundButton: document.getElementById("next-round-button"),
+  dailySelect: document.getElementById("daily-select"),
+  dailyStatus: document.getElementById("daily-status"),
   runStatsGrid: document.getElementById("run-stats-grid"),
   profileTitle: document.getElementById("profile-title"),
   profileSubtitle: document.getElementById("profile-subtitle"),
   profileRank: document.getElementById("profile-rank"),
   profileCountryCount: document.getElementById("profile-country-count"),
-  profileStatsGrid: document.getElementById("profile-stats-grid"),
   countryOutlineGallery: document.getElementById("country-outline-gallery"),
   shareCanvas: document.getElementById("share-canvas"),
   map: document.getElementById("map"),
@@ -432,11 +796,17 @@ const el = {
   outlineSourceMap: document.getElementById("outline-source-map"),
   guessLayout: document.getElementById("guess-layout"),
   lostScreen: document.getElementById("lost-screen"),
+  winScreen: document.getElementById("win-screen"),
   lostCountryName: document.getElementById("lost-country-name"),
   lostSubtext: document.getElementById("lost-subtext"),
   lostStatsGrid: document.getElementById("lost-stats-grid"),
   lostCountryOutline: document.getElementById("lost-country-outline"),
   lostNewRunButton: document.getElementById("lost-new-run-button"),
+  winHeading: document.getElementById("win-heading"),
+  winSubtext: document.getElementById("win-subtext"),
+  winStatsGrid: document.getElementById("win-stats-grid"),
+  winCountryOutline: document.getElementById("win-country-outline"),
+  winNewRunButton: document.getElementById("win-new-run-button"),
   signupConfirmPassword: document.getElementById("signup-confirm-password"),
   sidebarOutlineGallery: document.getElementById("sidebar-outline-gallery")
 };
@@ -459,7 +829,8 @@ const state = {
   revealTimer: null,
   mapFocusTimer: null,
   outlineMetrics: {},
-  authOpen: false
+  authOpen: false,
+  selectedDateKey: ""
 };
 
 function defaultUser(displayName, username, email = "", id = "") {
@@ -474,14 +845,14 @@ function defaultUser(displayName, username, email = "", id = "") {
 
 function activeUser() {
   const user = state.users.find((entry) => entry.username === state.session) || null;
-  if (user && typeof user.stats.currentLevel !== "number") {
-    user.stats.currentLevel = 1;
+  if (user && typeof user.stats.currentPuzzleScore !== "number") {
+    user.stats.currentPuzzleScore = 0;
   }
   return user;
 }
 
-function backendConfigured() {
-  return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase && typeof window.supabase.createClient === "function");
+async function loadRuntimeConfig() {
+  return Promise.resolve();
 }
 
 function cloneStats(stats = {}) {
@@ -489,8 +860,165 @@ function cloneStats(stats = {}) {
     ...defaultStats(),
     ...stats,
     countriesSolved: Array.isArray(stats.countriesSolved) ? stats.countriesSolved : [],
-    latestRun: Array.isArray(stats.latestRun) ? stats.latestRun : []
+    latestRun: Array.isArray(stats.latestRun) ? stats.latestRun : [],
+    dailyHistory: stats.dailyHistory && typeof stats.dailyHistory === "object" ? stats.dailyHistory : {}
   };
+}
+
+function pointsForClueIndex(index) {
+  return Math.max(1, 5 - index);
+}
+
+function parseDateKey(dateKey) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function formatDateKey(date) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function shiftDateKey(dateKey, days) {
+  const date = parseDateKey(dateKey);
+  date.setDate(date.getDate() + days);
+  return formatDateKey(date);
+}
+
+function todayDateKey() {
+  return formatDateKey(new Date());
+}
+
+function puzzleIndexForDate(dateKey) {
+  const start = parseDateKey(DAILY_START_DATE);
+  const target = parseDateKey(dateKey);
+  const diffMs = target.getTime() - start.getTime();
+  return Math.floor(diffMs / 86400000);
+}
+
+function availableDateKeys() {
+  const today = todayDateKey();
+  const authoredDayCount = Math.floor(DAILY_ROUNDS.length / DAILY_RUN_LENGTH);
+  return Array.from({ length: authoredDayCount }, (_, index) => shiftDateKey(DAILY_START_DATE, index)).filter((dateKey) => dateKey <= today);
+}
+
+function formatLongDate(dateKey) {
+  return parseDateKey(dateKey).toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+
+function currentPuzzleResult(dateKey = state.selectedDateKey) {
+  const user = currentPlayer();
+  return user?.stats.dailyHistory?.[dateKey] || null;
+}
+
+function getLocalRound(dateKey = state.selectedDateKey || todayDateKey(), roundNumber = 1) {
+  const puzzleIndex = puzzleIndexForDate(dateKey);
+  const authoredDayCount = Math.floor(DAILY_ROUNDS.length / DAILY_RUN_LENGTH);
+  const safeDayIndex = Math.max(0, Math.min(puzzleIndex, authoredDayCount - 1));
+  const safeRoundNumber = Math.max(1, Math.min(roundNumber, DAILY_RUN_LENGTH));
+  const safeIndex = safeDayIndex * DAILY_RUN_LENGTH + (safeRoundNumber - 1);
+  const round = DAILY_ROUNDS[safeIndex];
+  return {
+    id: round.id,
+    country: round.country,
+    code: round.code,
+    tier: round.tier,
+    puzzleNumber: safeDayIndex + 1,
+    dateKey,
+    roundNumber: safeRoundNumber,
+    clues: [...round.cities].reverse().map((city, index) => ({
+      city,
+      clueLabel: `Clue ${index + 1}`,
+      points: pointsForClueIndex(index)
+    })),
+    token: "",
+    answered: false,
+    visibleClueCount: 1,
+    source: "local"
+  };
+}
+
+function publishedPuzzleCount() {
+  return availableDateKeys().length;
+}
+
+function setSelectedDateKey(dateKey) {
+  const available = availableDateKeys();
+  const fallback = available[available.length - 1] || DAILY_START_DATE;
+  state.selectedDateKey = available.includes(dateKey) ? dateKey : fallback;
+}
+
+function renderDailyPicker() {
+  if (!el.dailySelect) return;
+
+  const available = availableDateKeys();
+  if (!available.length) {
+    el.dailySelect.innerHTML = "";
+    el.dailyStatus.textContent = "No daily puzzles are published yet.";
+    return;
+  }
+
+  if (!available.includes(state.selectedDateKey)) {
+    setSelectedDateKey(available[available.length - 1]);
+  }
+
+  el.dailySelect.innerHTML = "";
+  available
+    .slice()
+    .reverse()
+    .forEach((dateKey) => {
+      const option = document.createElement("option");
+      option.value = dateKey;
+      option.textContent = `${formatLongDate(dateKey)}${dateKey === todayDateKey() ? " · Today" : ""}`;
+      el.dailySelect.appendChild(option);
+    });
+  el.dailySelect.value = state.selectedDateKey;
+
+  const result = currentPuzzleResult(state.selectedDateKey);
+  if (!result) {
+    el.dailyStatus.textContent = `${publishedPuzzleCount()} daily run${publishedPuzzleCount() === 1 ? "" : "s"} published so far.`;
+    return;
+  }
+
+  el.dailyStatus.textContent = result.failed
+    ? `${formatLongDate(state.selectedDateKey)} ended on round ${result.roundsCleared + 1} with ${result.score} points.`
+    : `${formatLongDate(state.selectedDateKey)} cleared all ${DAILY_RUN_LENGTH} rounds for ${result.score} points.`;
+}
+
+function recordDailyResult(user, round, payload) {
+  const previous = user.stats.dailyHistory[round.dateKey];
+  const nextEntry = {
+    dateKey: round.dateKey,
+    country: payload.country,
+    code: payload.code,
+    score: payload.score || 0,
+    roundsCleared: payload.roundsCleared || 0,
+    completed: Boolean(payload.completed),
+    failed: Boolean(payload.failed),
+    visibleClueCount: round.visibleClueCount
+  };
+
+  user.stats.dailyHistory[round.dateKey] = nextEntry;
+  user.stats.lastPlayedDate = round.dateKey;
+
+  if (!previous && nextEntry.completed) {
+    user.stats.dailyCompleted += 1;
+  }
+
+  if (!previous?.completed && nextEntry.completed) {
+    user.stats.dailyCompleted += 1;
+  }
+
+  if (previous?.completed && !nextEntry.completed) {
+    user.stats.dailyCompleted = Math.max(0, user.stats.dailyCompleted - 1);
+  }
 }
 
 function hydrateProfile(record, authUser = null) {
@@ -511,9 +1039,48 @@ function hydrateProfile(record, authUser = null) {
   };
 }
 
+function loadStoredProfile() {
+  try {
+    const raw = window.localStorage.getItem(LOCAL_PROFILE_KEY);
+    if (!raw) {
+      return defaultGuest();
+    }
+
+    const parsed = JSON.parse(raw);
+    const profile = hydrateProfile(parsed);
+    profile.guest = false;
+    profile.id = profile.id || "local-profile";
+    profile.username = profile.username || "localplayer";
+    profile.displayName = profile.displayName || "Local Player";
+    return profile;
+  } catch (error) {
+    console.error(error);
+    return defaultGuest();
+  }
+}
+
+function writeStoredProfile(profile) {
+  try {
+    window.localStorage.setItem(
+      LOCAL_PROFILE_KEY,
+      JSON.stringify({
+        id: profile.id || "local-profile",
+        email: profile.email || "",
+        username: profile.username || "localplayer",
+        displayName: profile.displayName || "Local Player",
+        stats: cloneStats(profile.stats)
+      })
+    );
+  } catch (error) {
+    console.error(error);
+    setGuessMessage("Could not save local progress on this device.", "error");
+  }
+}
+
 function setAuthenticatedUser(profile) {
   state.users = [profile];
   state.session = profile.username;
+  writeStoredProfile(profile);
 }
 
 function clearAuthenticatedUser() {
@@ -526,10 +1093,8 @@ function saveSession(username) {
 }
 
 async function clearSession() {
-  if (state.supabase) {
-    await state.supabase.auth.signOut();
-  }
-  clearAuthenticatedUser();
+  state.guest = defaultGuest();
+  setAuthenticatedUser(state.guest);
 }
 
 function currentPlayer() {
@@ -538,8 +1103,8 @@ function currentPlayer() {
     return user;
   }
 
-  if (typeof state.guest.stats.currentLevel !== "number") {
-    state.guest.stats.currentLevel = 1;
+  if (typeof state.guest.stats.currentPuzzleScore !== "number") {
+    state.guest.stats.currentPuzzleScore = 0;
   }
 
   return state.guest;
@@ -549,49 +1114,22 @@ function isAuthenticated() {
   return Boolean(activeUser());
 }
 
-async function usernameTaken(username, excludeId = "") {
-  if (!state.supabase) return false;
-  const { data, error } = await state.supabase
-    .from("profiles")
-    .select("id")
-    .eq("username", username)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return Boolean(data && data.id !== excludeId);
-}
-
 async function persistProfile(player = currentPlayer()) {
-  if (!state.supabase || !player || player.guest) {
+  if (!player) {
     return;
   }
-
-  const payload = {
-    id: player.id,
-    email: player.email,
-    username: player.username,
-    display_name: player.displayName,
-    stats: player.stats
-  };
-
-  const { data, error } = await state.supabase
-    .from("profiles")
-    .upsert(payload)
-    .select()
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  setAuthenticatedUser(hydrateProfile(data));
+  setAuthenticatedUser({
+    ...player,
+    guest: false,
+    id: player.id || "local-profile",
+    username: player.username || "localplayer",
+    displayName: player.displayName || "Local Player",
+    stats: cloneStats(player.stats)
+  });
 }
 
 async function savePlayerIfNeeded(player = currentPlayer()) {
-  if (!player || player.guest) {
+  if (!player) {
     return;
   }
 
@@ -604,74 +1142,13 @@ async function savePlayerIfNeeded(player = currentPlayer()) {
 }
 
 async function loadAuthenticatedProfile(authUser) {
-  if (!state.supabase || !authUser) {
-    clearAuthenticatedUser();
-    return null;
-  }
-
-  const { data, error } = await state.supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", authUser.id)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  const profile = data
-    ? hydrateProfile(data, authUser)
-    : hydrateProfile(
-        {
-          id: authUser.id,
-          email: authUser.email || "",
-          username: authUser.user_metadata?.username || normalizeName((authUser.email || "player").split("@")[0]).replace(/\s+/g, ""),
-          display_name: authUser.user_metadata?.display_name || (authUser.email || "Player").split("@")[0],
-          stats: defaultStats()
-        },
-        authUser
-      );
-
+  const profile = loadStoredProfile();
   setAuthenticatedUser(profile);
-
-  if (!data) {
-    await persistProfile(profile);
-  }
-
   return profile;
 }
 
 async function initBackend() {
-  if (!backendConfigured()) {
-    state.authReady = true;
-    return;
-  }
-
-  state.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const {
-    data: { session }
-  } = await state.supabase.auth.getSession();
-
-  if (session?.user) {
-    await loadAuthenticatedProfile(session.user);
-  }
-
-  const { data } = state.supabase.auth.onAuthStateChange(async (_event, nextSession) => {
-    try {
-      if (nextSession?.user) {
-        await loadAuthenticatedProfile(nextSession.user);
-      } else {
-        clearAuthenticatedUser();
-      }
-    } catch (error) {
-      console.error(error);
-      setMessage("Could not sync your account.", "error");
-    }
-
-    syncApp();
-  });
-
-  state.authSubscription = data.subscription;
+  await loadAuthenticatedProfile();
   state.authReady = true;
 }
 
@@ -805,15 +1282,9 @@ function bumpStreakBar() {
   el.roundProgressFill.classList.add("is-bumping");
 }
 
-function runRoundsCleared(user) {
-  return user.stats.latestRun.filter((entry) => !entry.failed).length;
-}
-
-function updateRoundProgress(user, round) {
-  const roundsCleared = runRoundsCleared(user);
-  const totalRounds = Math.min(RUN_LENGTH, COUNTRY_ROUNDS.length);
-  const progress = Math.max(0, Math.min(100, (roundsCleared / totalRounds) * 100));
-  el.roundProgressLabel.textContent = `Streak: ${roundsCleared} Countries`;
+function updateRoundProgress(_user, round) {
+  const progress = Math.max(10, Math.min(100, (round.roundNumber / DAILY_RUN_LENGTH) * 100));
+  el.roundProgressLabel.textContent = `Round ${round.roundNumber} of ${DAILY_RUN_LENGTH}`;
   el.roundProgressFill.style.width = `${progress}%`;
 }
 
@@ -881,117 +1352,12 @@ function handleClueClick(event) {
 
 async function handleSignup(event) {
   event.preventDefault();
-  if (!backendConfigured()) {
-    setMessage("Add your Supabase URL and anon key in supabase-config.js first.", "error");
-    return;
-  }
-
-  const email = el.signupEmail.value.trim().toLowerCase();
-  const username = normalizeName(el.signupUsername.value).replace(/\s+/g, "");
-  const displayName = el.signupDisplayName.value.trim();
-  const password = el.signupPassword.value;
-  const confirmPassword = el.signupConfirmPassword.value;
-
-  if (!email) {
-    setMessage("Email is required.", "error");
-    return;
-  }
-
-  if (username.length < 3) {
-    setMessage("Username must be at least 3 characters.", "error");
-    return;
-  }
-
-  if (displayName.length < 2) {
-    setMessage("Display name must be at least 2 characters.", "error");
-    return;
-  }
-
-  if (password.length < 4) {
-    setMessage("Password must be at least 4 characters.", "error");
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    setMessage("Passwords do not match.", "error");
-    return;
-  }
-
-  try {
-    if (await usernameTaken(username)) {
-      setMessage("That username is already taken. Try another.", "error");
-      return;
-    }
-
-    const { data, error } = await state.supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username,
-          display_name: displayName
-        }
-      }
-    });
-
-    if (error) {
-      setMessage(error.message, "error");
-      return;
-    }
-
-    if (data.user && data.session) {
-      await loadAuthenticatedProfile(data.user);
-      state.authOpen = false;
-      setMessage("");
-      startFreshRun();
-      showView("game-view");
-      syncApp();
-      return;
-    }
-
-    setAuthMode("login");
-    setMessage("Account created. Check your email to confirm, then log in.", "success");
-    syncApp();
-  } catch (error) {
-    console.error(error);
-    setMessage(error.message || "Could not create your account.", "error");
-  }
+  setMessage("Progress now saves automatically on this device. No sign-up needed.", "success");
 }
 
 async function handleLogin(event) {
   event.preventDefault();
-  if (!backendConfigured()) {
-    setMessage("Add your Supabase URL and anon key in supabase-config.js first.", "error");
-    return;
-  }
-
-  const email = el.loginEmail.value.trim().toLowerCase();
-  const password = el.loginPassword.value;
-
-  try {
-    const {
-      data: { user },
-      error
-    } = await state.supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error || !user) {
-      setMessage(error?.message || "Invalid email or password.", "error");
-      return;
-    }
-
-    await loadAuthenticatedProfile(user);
-    state.authOpen = false;
-    setMessage("");
-    startRunFromUser();
-    showView("game-view");
-    syncApp();
-  } catch (error) {
-    console.error(error);
-    setMessage(error.message || "Could not log you in.", "error");
-  }
+  setMessage("Progress now saves automatically on this device. No login needed.", "success");
 }
 
 function startFreshRun() {
@@ -1000,34 +1366,22 @@ function startFreshRun() {
   clearTimeout(state.revealTimer);
   clearTimeout(state.mapFocusTimer);
   state.currentGuess = "";
-  user.stats.currentRunScore = 0;
-  user.stats.currentLevel = 1;
+  user.stats.currentPuzzleScore = 0;
+  user.stats.lastPlayedDate = state.selectedDateKey || todayDateKey();
   user.stats.latestRun = [];
-  user.stats.runsStarted += 1;
   savePlayerIfNeeded(user);
-  createRound(1);
+  createRound(state.selectedDateKey || todayDateKey(), 1);
 }
 
 function startRunFromUser() {
-  const user = currentPlayer();
-  if (!user) return;
-  createRound(Math.max(1, user.stats.currentLevel || 1));
+  setSelectedDateKey(currentPlayer()?.stats.lastPlayedDate || todayDateKey());
+  createRound(state.selectedDateKey, 1);
 }
 
-function createRound(level) {
-  const round = COUNTRY_ROUNDS[Math.min(level - 1, RUN_LENGTH - 1, COUNTRY_ROUNDS.length - 1)];
+function createRound(dateKey, roundNumber = 1) {
+  setSelectedDateKey(dateKey);
   state.currentGuess = "";
-  state.currentRound = {
-    ...round,
-    level,
-    clues: [...round.cities].reverse().map((city, index) => ({
-      city,
-      clueLabel: `Clue ${index + 1}`,
-      points: Math.max(1, 5 - index)
-    })),
-    answered: false,
-    visibleClueCount: 1
-  };
+  state.currentRound = getLocalRound(state.selectedDateKey, roundNumber);
   renderGame();
 }
 
@@ -1042,13 +1396,15 @@ function renderGame() {
 
   el.guessLayout.classList.remove("hidden");
   el.lostScreen.classList.add("hidden");
+  el.winScreen.classList.add("hidden");
 
-  el.runHeading.textContent = `Level ${round.level}`;
-  el.runSubtext.innerHTML = `Clues reveal from hardest to easiest. Guess early for more points.<br />One wrong answer ends the run.`;
-  el.scorePill.textContent = `Score ${user.stats.currentRunScore}`;
-  el.nextRoundButton.textContent = "New run";
+  el.runHeading.textContent = `Daily Run #${round.puzzleNumber} · ${formatLongDate(round.dateKey)}`;
+  el.runSubtext.innerHTML = `Each day has ${DAILY_RUN_LENGTH} rounds. Guess early for more points.<br />Use the menu to revisit any published day.`;
+  el.scorePill.textContent = `Score ${user.stats.currentPuzzleScore}`;
+  el.nextRoundButton.textContent = "Jump to today";
   el.countryGuessInput.value = state.currentGuess;
   el.countryGuessInput.disabled = false;
+  renderDailyPicker();
   renderCountrySuggestions();
   setGuessMessage(`Current guess value: ${pointsForVisibleClues(round)} point${pointsForVisibleClues(round) === 1 ? "" : "s"}.`);
   resetAnswerPanelFeedback();
@@ -1082,12 +1438,13 @@ function renderRunStats() {
   const user = currentPlayer();
   if (!user || !el.runStatsGrid) return;
 
+  const currentResult = currentPuzzleResult();
   const stats = [
-    ["Current score", user.stats.currentRunScore],
-    ["Current level", user.stats.currentLevel],
-    ["Best level", user.stats.bestLevel],
-    ["Correct", user.stats.correctGuesses],
-    ["Incorrect", user.stats.incorrectGuesses]
+    ["Selected date", formatLongDate(state.selectedDateKey)],
+    ["Published runs", publishedPuzzleCount()],
+    ["Daily clears", user.stats.dailyCompleted],
+    ["Best score", user.stats.bestScore],
+    ["Status", currentResult ? (currentResult.completed ? "Cleared" : "Missed") : "Unplayed"]
   ];
 
   el.runStatsGrid.innerHTML = "";
@@ -1101,7 +1458,7 @@ function renderRunStats() {
   renderSidebarOutlines();
 }
 
-function handleGuess(event) {
+async function handleGuess(event) {
   event.preventDefault();
   const user = currentPlayer();
   const round = state.currentRound;
@@ -1109,42 +1466,47 @@ function handleGuess(event) {
   clearTimeout(state.revealTimer);
 
   const guess = canonicalCountry(el.countryGuessInput.value);
-  const correct = guess === round.country;
   const guessCountry = COUNTRY_NAMES.find((country) => canonicalCountry(country) === guess) || "";
-  round.answered = true;
   hideCountrySuggestions();
+
+  const result = {
+    correct: guess === round.country,
+    country: round.country,
+    code: round.code,
+    token: round.token
+  };
+
+  const { correct, country, code, token } = result;
+  round.token = token || round.token;
+  round.answered = true;
 
   if (correct) {
     const awardedPoints = pointsForVisibleClues(round);
-    const beatBestLevel = round.level > user.stats.bestLevel;
     user.stats.correctGuesses += 1;
-    user.stats.currentRunScore += awardedPoints;
+    user.stats.currentPuzzleScore += awardedPoints;
     user.stats.totalRoundsCleared += 1;
-    user.stats.bestLevel = Math.max(user.stats.bestLevel, round.level);
-    user.stats.currentLevel = Math.min(RUN_LENGTH, COUNTRY_ROUNDS.length, round.level + 1);
-    if (!user.stats.countriesSolved.some((entry) => entry.code === round.code)) {
-      user.stats.countriesSolved.push({ country: round.country, code: round.code });
+    user.stats.bestScore = Math.max(user.stats.bestScore, user.stats.currentPuzzleScore);
+    if (!user.stats.countriesSolved.some((entry) => entry.code === code)) {
+      user.stats.countriesSolved.push({ country, code });
     }
     user.stats.latestRun.push({
-      country: round.country,
-      code: round.code,
-      level: round.level,
+      country,
+      code,
+      dateKey: round.dateKey,
+      roundNumber: round.roundNumber,
       clues: round.clues.slice(0, round.visibleClueCount).map((entry) => entry.city),
       points: awardedPoints
     });
     savePlayerIfNeeded(user);
     applyUnlockedRegions();
-    if (isAuthenticated()) {
-      renderProfile();
-    }
+    renderProfile();
     renderRunStats();
     drawShareCards();
-    flashRegion(round.code);
-    focusGameMapOnCountry(round.code);
+    flashRegion(code);
+    focusGameMapOnCountry(code);
     triggerAnswerPanelFeedback("success");
     bumpStreakBar();
-    const successTag = beatBestLevel || user.stats.currentRunScore >= 10 ? " You're cooking." : "";
-    setGuessMessage(`Correct! +${awardedPoints} point${awardedPoints === 1 ? "" : "s"}. ${round.country} is right.${successTag}`, "success");
+    setGuessMessage(`Correct! +${awardedPoints} point${awardedPoints === 1 ? "" : "s"}. ${country} is right.`, "success");
     updateRoundProgress(user, round);
     el.countryGuessInput.disabled = true;
     clearTimeout(state.autoAdvanceTimer);
@@ -1154,52 +1516,68 @@ function handleGuess(event) {
         return;
       }
 
-      if (round.level >= Math.min(RUN_LENGTH, COUNTRY_ROUNDS.length)) {
-        liveUser.stats.currentLevel = 1;
+      if (round.roundNumber >= DAILY_RUN_LENGTH) {
+        recordDailyResult(liveUser, round, {
+          country,
+          code,
+          score: liveUser.stats.currentPuzzleScore,
+          roundsCleared: DAILY_RUN_LENGTH,
+          completed: true,
+          failed: false
+        });
         savePlayerIfNeeded(liveUser);
-        startFreshRun();
-        syncApp();
+        showWinScreen({ ...round, country, code }, liveUser.stats.currentPuzzleScore);
         return;
       }
 
-      liveUser.stats.currentLevel = round.level + 1;
       savePlayerIfNeeded(liveUser);
-      createRound(round.level + 1);
+      createRound(round.dateKey, round.roundNumber + 1);
       syncApp();
     }, 1200);
     return;
   }
 
-  const finalScore = user.stats.currentRunScore;
-  const countriesCleared = user.stats.latestRun.filter((e) => !e.failed).length;
-
+  const finalScore = user.stats.currentPuzzleScore;
+  const roundsCleared = Math.max(0, round.roundNumber - 1);
   user.stats.incorrectGuesses += 1;
-  user.stats.bestLevel = Math.max(user.stats.bestLevel, Math.max(0, round.level - 1));
-  user.stats.currentRunScore = 0;
-  user.stats.currentLevel = 1;
+  user.stats.currentPuzzleScore = 0;
   user.stats.latestRun.push({
-    country: round.country,
-    code: round.code,
-    level: round.level,
+    country,
+    code,
+    dateKey: round.dateKey,
+    roundNumber: round.roundNumber,
     clues: round.clues.slice(0, round.visibleClueCount).map((entry) => entry.city),
+    failed: true
+  });
+  recordDailyResult(user, round, {
+    country,
+    code,
+    score: finalScore,
+    roundsCleared,
+    completed: false,
     failed: true
   });
   savePlayerIfNeeded(user);
   drawShareCards();
   renderRunStats();
   triggerAnswerPanelFeedback("error");
-  const sameRegion = guessCountry && COUNTRY_REGIONS[guessCountry] === COUNTRY_REGIONS[round.country];
-  const gettable = round.visibleClueCount >= 4 || round.level <= 4;
+  const sameRegion = guessCountry && COUNTRY_REGIONS[guessCountry] === COUNTRY_REGIONS[country];
+  const gettable = round.visibleClueCount >= 4 || round.roundNumber <= 4;
   const dryTag = sameRegion ? " You're in the right region..." : gettable ? " That was gettable." : "";
-  setGuessMessage(`Wrong. Run ends at ${round.level}.${dryTag}`, "error");
+  setGuessMessage(`Wrong. The daily run ends on round ${round.roundNumber}.${dryTag}`, "error");
   el.countryGuessInput.disabled = true;
   clearTimeout(state.autoAdvanceTimer);
   state.autoAdvanceTimer = window.setTimeout(() => {
-    showLostScreen(round, finalScore, countriesCleared);
+    showLostScreen({ ...round, country, code }, finalScore, roundsCleared);
   }, 650);
 }
 
 function handleNextRound() {
+  setSelectedDateKey(todayDateKey());
+  startFreshRun();
+}
+
+function handleReplayDay() {
   startFreshRun();
 }
 
@@ -1217,7 +1595,7 @@ function handleRevealClue() {
   setGuessMessage("Revealing clue...", "");
   clearTimeout(state.revealTimer);
   state.revealTimer = window.setTimeout(() => {
-    round.visibleClueCount += 1;
+    round.visibleClueCount = Math.min(round.clues.length, round.visibleClueCount + 1);
     renderGame();
 
     if (round.visibleClueCount >= round.clues.length) {
@@ -1229,15 +1607,16 @@ function handleRevealClue() {
   }, 280);
 }
 
-function showLostScreen(round, finalScore, countriesCleared) {
+function showLostScreen(round, finalScore, roundsCleared) {
   el.guessLayout.classList.add("hidden");
   el.lostScreen.classList.remove("hidden");
+  el.winScreen.classList.add("hidden");
 
   el.lostCountryName.textContent = `The answer was ${round.country}`;
-  el.lostSubtext.textContent = `You reached level ${round.level} and cleared ${countriesCleared} ${countriesCleared === 1 ? "country" : "countries"} this run.`;
+  el.lostSubtext.textContent = `${formatLongDate(round.dateKey)} ended on round ${round.roundNumber}. You can replay the whole day anytime.`;
 
   el.lostStatsGrid.innerHTML = "";
-  [["Run score", finalScore], ["Level reached", round.level], ["This run", `${countriesCleared} cleared`]].forEach(([label, value]) => {
+  [["Date", formatLongDate(round.dateKey)], ["Score", finalScore], ["Rounds cleared", `${roundsCleared}/${DAILY_RUN_LENGTH}`]].forEach(([label, value]) => {
     const card = document.createElement("div");
     card.className = "stat-card";
     card.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
@@ -1249,6 +1628,31 @@ function showLostScreen(round, finalScore, countriesCleared) {
   } else {
     requestAnimationFrame(() => {
       el.lostCountryOutline.innerHTML = countryOutlineSvg(round.code);
+    });
+  }
+}
+
+function showWinScreen(round, finalScore) {
+  el.guessLayout.classList.add("hidden");
+  el.lostScreen.classList.add("hidden");
+  el.winScreen.classList.remove("hidden");
+
+  el.winHeading.textContent = `${formatLongDate(round.dateKey)} cleared`;
+  el.winSubtext.textContent = `All ${DAILY_RUN_LENGTH} rounds complete. Final score: ${finalScore}.`;
+
+  el.winStatsGrid.innerHTML = "";
+  [["Score", finalScore], ["Rounds", `${DAILY_RUN_LENGTH}/${DAILY_RUN_LENGTH}`], ["Final country", round.country]].forEach(([label, value]) => {
+    const card = document.createElement("div");
+    card.className = "stat-card";
+    card.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
+    el.winStatsGrid.appendChild(card);
+  });
+
+  if (state.mapReady) {
+    el.winCountryOutline.innerHTML = countryOutlineSvg(round.code);
+  } else {
+    requestAnimationFrame(() => {
+      el.winCountryOutline.innerHTML = countryOutlineSvg(round.code);
     });
   }
 }
@@ -1301,26 +1705,9 @@ function renderProfile() {
 
   const countryCount = user.stats.countriesSolved.length;
   el.profileTitle.textContent = `${user.displayName}'s archive`;
-  el.profileSubtitle.textContent = `@${user.username} · Keep running to unlock more country outlines and climb the ranks.`;
+  el.profileSubtitle.textContent = `Stored on this device · Solve the daily puzzle and revisit older days anytime.`;
   el.profileRank.textContent = getRank(countryCount);
   el.profileCountryCount.textContent = `${countryCount} country outline${countryCount === 1 ? "" : "s"} unlocked`;
-
-  const stats = [
-    ["Correct guesses", user.stats.correctGuesses],
-    ["Incorrect guesses", user.stats.incorrectGuesses],
-    ["Countries solved", countryCount],
-    ["Best level", user.stats.bestLevel],
-    ["Runs started", user.stats.runsStarted],
-    ["Rounds cleared", user.stats.totalRoundsCleared]
-  ];
-
-  el.profileStatsGrid.innerHTML = "";
-  stats.forEach(([label, value]) => {
-    const card = document.createElement("div");
-    card.className = "stat-card";
-    card.innerHTML = `<span>${label}</span><strong>${value}</strong>`;
-    el.profileStatsGrid.appendChild(card);
-  });
 
   renderCountryOutlines(user.stats.countriesSolved);
 }
@@ -1669,11 +2056,11 @@ function drawShareCard(canvas, user) {
 
   ctx.fillStyle = "#f4f7fb";
   ctx.font = "400 64px Instrument Serif";
-  ctx.fillText(`${user.displayName}'s run`, 72, 168);
+  ctx.fillText(`${user.displayName}'s daily`, 72, 168);
 
   ctx.font = "500 22px Space Grotesk";
   ctx.fillStyle = "#92a1b6";
-  ctx.fillText(`@${user.username} · Score ${user.stats.currentRunScore} · Best level ${user.stats.bestLevel}`, 72, 214);
+  ctx.fillText(`@${user.username} · Best daily score ${user.stats.bestScore} · Days cleared ${user.stats.dailyCompleted}`, 72, 214);
 
   const recent = user.stats.latestRun.slice(-3).reverse();
   ctx.font = "600 18px Space Grotesk";
@@ -1683,7 +2070,7 @@ function drawShareCard(canvas, user) {
   recent.forEach((entry, index) => {
     const y = 326 + index * 108;
     ctx.fillStyle = entry.failed ? "#ff7a8f" : "#85ffb8";
-    ctx.fillText(`${entry.country} · Level ${entry.level}${entry.failed ? " · missed" : ""}`, 72, y);
+    ctx.fillText(`${entry.country} · ${entry.dateKey || "Archive"} · R${entry.roundNumber || 1}${entry.failed ? " · missed" : ""}`, 72, y);
     ctx.fillStyle = "#92a1b6";
     ctx.font = "500 17px Space Grotesk";
     ctx.fillText(entry.clues.join("  ·  "), 72, y + 34);
@@ -1712,7 +2099,7 @@ function drawShareCard(canvas, user) {
 
   ctx.fillStyle = "#92a1b6";
   ctx.font = "500 16px Space Grotesk";
-  ctx.fillText("Five cities. One country. Keep the run alive.", 72, height - 76);
+  ctx.fillText("Ten rounds each day. Come back tomorrow for a new run.", 72, height - 76);
 }
 
 function roundRect(ctx, x, y, width, height, radius) {
@@ -1755,13 +2142,10 @@ function downloadCanvas(canvas, fileName) {
 }
 
 function syncApp() {
-  const authenticated = isAuthenticated();
-  el.authView.classList.toggle("hidden", !state.authOpen);
-  el.appView.classList.toggle("hidden", state.authOpen);
-  el.accountEntryButton.classList.toggle("hidden", authenticated);
-  el.logoutButton.classList.toggle("hidden", !authenticated);
+  el.authView.classList.add("hidden");
+  el.appView.classList.remove("hidden");
 
-  if (authenticated && !state.mapsBuilt) {
+  if (!state.mapsBuilt) {
     state.mapsBuilt = true;
     buildMaps();
   }
@@ -1772,25 +2156,18 @@ function syncApp() {
   }
 
   renderGame();
-  if (authenticated) {
-    renderProfile();
-  }
+  renderProfile();
   renderRunStats();
-  if (authenticated) {
-    applyUnlockedRegions();
-  }
+  applyUnlockedRegions();
   drawShareCards();
-  if (!authenticated) {
-    showView("game-view");
-  }
 }
 
-el.showLoginButton.addEventListener("click", () => setAuthMode("login"));
-el.showSignupButton.addEventListener("click", () => setAuthMode("signup"));
-el.accountEntryButton.addEventListener("click", openAuth);
-el.closeAuthButton.addEventListener("click", closeAuth);
-el.signupForm.addEventListener("submit", handleSignup);
-el.loginForm.addEventListener("submit", handleLogin);
+el.showLoginButton?.addEventListener("click", () => setAuthMode("login"));
+el.showSignupButton?.addEventListener("click", () => setAuthMode("signup"));
+el.accountEntryButton?.addEventListener("click", openAuth);
+el.closeAuthButton?.addEventListener("click", closeAuth);
+el.signupForm?.addEventListener("submit", handleSignup);
+el.loginForm?.addEventListener("submit", handleLogin);
 el.countryGuessForm.addEventListener("submit", handleGuess);
 el.countryGuessInput.addEventListener("input", handleGuessInput);
 el.countryGuessInput.addEventListener("focus", renderCountrySuggestions);
@@ -1800,24 +2177,14 @@ el.countryGuessInput.addEventListener("blur", () => {
 el.countrySuggestions.addEventListener("mousedown", handleSuggestionClick);
 el.clueStack.addEventListener("click", handleClueClick);
 el.nextRoundButton.addEventListener("click", handleNextRound);
-el.logoutButton.addEventListener("click", async () => {
-  clearTimeout(state.autoAdvanceTimer);
-  await clearSession();
-  state.guest = defaultGuest();
-  state.currentRound = null;
-  state.authOpen = false;
-  setAuthMode("login");
+el.dailySelect?.addEventListener("change", (event) => {
+  setSelectedDateKey(event.target.value);
   startFreshRun();
-  syncApp();
 });
-el.lostNewRunButton.addEventListener("click", handleNextRound);
+el.lostNewRunButton.addEventListener("click", handleReplayDay);
+el.winNewRunButton.addEventListener("click", handleReplayDay);
 el.navButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    if (button.dataset.viewTarget === "profile-view" && !isAuthenticated()) {
-      openAuth();
-      return;
-    }
-
     closeAuth();
     showView(button.dataset.viewTarget);
   });
@@ -1827,10 +2194,11 @@ async function bootstrapApp() {
   setAuthMode("login");
 
   try {
+    await loadRuntimeConfig();
     await initBackend();
   } catch (error) {
     console.error(error);
-    setMessage("Could not connect to Supabase. Guest mode still works.", "error");
+    setMessage("Could not load saved local progress.", "error");
   }
 
   if (activeUser()) {

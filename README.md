@@ -4,7 +4,7 @@ GeoStreak is a dark, run-based geography game where each round gives you one cou
 
 ## Features
 
-- Supabase-backed sign-up and login flow
+- Automatic local progress saving with `localStorage`
 - Level-based progression
 - One-country rounds with progressive clue reveals
 - Profile page with stats and unlocked-country archive
@@ -12,33 +12,30 @@ GeoStreak is a dark, run-based geography game where each round gives you one cou
 
 ## Local Development
 
-Serve the project from the repo root with any static server.
+This app now uses Vercel API routes for round delivery, guess validation, and runtime config.
 
 Example:
 
 ```bash
-python3 -m http.server 5734
+vercel dev
 ```
 
 Then open:
 
 ```text
-http://127.0.0.1:5734
+http://127.0.0.1:3000
 ```
 
 ## Deployment
 
 This repo is ready to deploy as a static site.
 
-## Supabase Setup
+## Configuration
 
-1. Create a Supabase project.
-2. Run [`supabase-schema.sql`](/Users/samuelevans/Documents/geostreak/supabase-schema.sql) in the Supabase SQL editor.
-3. Open [`supabase-config.js`](/Users/samuelevans/Documents/geostreak/supabase-config.js) and paste in your project URL and anon key.
-4. In Supabase Auth, enable Email auth.
-5. Serve or deploy the site normally.
+Set these environment variables where you deploy:
 
-The schema is set up so users can only read and update their own `profiles` row.
+- `GEOSTREAK_RUN_LENGTH` (optional, defaults to `10`)
+- `GEOSTREAK_TOKEN_SECRET` (required, any long random string)
 
 ### Vercel
 
@@ -46,7 +43,8 @@ The schema is set up so users can only read and update their own `profiles` row.
 2. Framework preset: `Other`
 3. Build command: leave empty
 4. Output directory: leave empty
-5. Deploy
+5. Add the environment variables above
+6. Deploy
 
 ### GitHub Pages
 
@@ -60,7 +58,8 @@ The schema is set up so users can only read and update their own `profiles` row.
 
 - `index.html`: app shell
 - `styles.css`: visual styling and animations
-- `app.js`: game logic, Supabase auth, stats, and profile persistence
-- `supabase-config.js`: frontend Supabase config placeholders
-- `supabase-schema.sql`: profile table and RLS policies
+- `app.js`: game logic, local profile persistence, stats, and profile rendering
+- `api/config.js`: runtime public config endpoint
+- `api/round.js`: server-delivered round data
+- `api/guess.js`: server-side guess validation
 - `vercel.json`: static deployment config for Vercel
