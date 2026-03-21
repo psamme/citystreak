@@ -916,7 +916,8 @@ const state = {
   mapFocusTimer: null,
   outlineMetrics: {},
   authOpen: false,
-  selectedDateKey: ""
+  selectedDateKey: "",
+  savedDayResult: null
 };
 
 function defaultUser(displayName, username, email = "", id = "") {
@@ -1453,6 +1454,7 @@ function startFreshRun() {
   clearTimeout(state.revealTimer);
   clearTimeout(state.mapFocusTimer);
   state.currentGuess = "";
+  state.savedDayResult = null;
   user.stats.currentPuzzleScore = 0;
   user.stats.lastPlayedDate = state.selectedDateKey || todayDateKey();
   user.stats.latestRun = [];
@@ -1462,12 +1464,13 @@ function startFreshRun() {
 
 function startRunFromUser() {
   setSelectedDateKey(currentPlayer()?.stats.lastPlayedDate || todayDateKey());
-  createRound(state.selectedDateKey, 1);
+  openSelectedDay();
 }
 
 function createRound(dateKey, roundNumber = 1) {
   setSelectedDateKey(dateKey);
   state.currentGuess = "";
+  state.savedDayResult = null;
   state.currentRound = getLocalRound(state.selectedDateKey, roundNumber);
   renderGame();
 }
@@ -1668,6 +1671,52 @@ function handleReplayDay() {
   startFreshRun();
 }
 
+function showSavedDayResult(dateKey = state.selectedDateKey) {
+  const result = currentPuzzleResult(dateKey);
+  if (!result) {
+    return false;
+  }
+
+  const roundNumber = result.completed ? DAILY_RUN_LENGTH : Math.max(1, result.roundsCleared + 1);
+  const baseRound = getLocalRound(dateKey, roundNumber);
+  const round = {
+    ...baseRound,
+    country: result.country || baseRound.country,
+    code: result.code || baseRound.code
+  };
+  state.currentRound = round;
+
+  if (result.completed) {
+    state.savedDayResult = {
+      type: "win",
+      finalScore: result.score,
+      roundsCleared: DAILY_RUN_LENGTH
+    };
+    showWinScreen(round, result.score);
+    setGuessMessage(`You scored ${result.score} on ${formatLongDate(dateKey)}.`, "success");
+    return true;
+  }
+
+  state.savedDayResult = {
+    type: "lost",
+    finalScore: result.score,
+    roundsCleared: result.roundsCleared
+  };
+  showLostScreen(round, result.score, result.roundsCleared);
+  setGuessMessage(`You scored ${result.score} on ${formatLongDate(dateKey)}.`, "error");
+  return true;
+}
+
+function openSelectedDay() {
+  if (showSavedDayResult(state.selectedDateKey)) {
+    renderDailyPicker();
+    renderRunStats();
+    return;
+  }
+
+  startFreshRun();
+}
+
 function handleRevealClue() {
   const round = state.currentRound;
   if (!round || round.answered || round.visibleClueCount >= round.clues.length) {
@@ -1700,7 +1749,7 @@ function showLostScreen(round, finalScore, roundsCleared) {
   el.winScreen.classList.add("hidden");
 
   el.lostCountryName.textContent = `The answer was ${round.country}`;
-  el.lostSubtext.textContent = `${formatLongDate(round.dateKey)} ended on round ${round.roundNumber}. You can replay the whole day anytime.`;
+  el.lostSubtext.textContent = `You scored ${finalScore} on ${formatLongDate(round.dateKey)}. Replay the whole day anytime.`;
 
   el.lostStatsGrid.innerHTML = "";
   [["Date", formatLongDate(round.dateKey)], ["Score", finalScore], ["Rounds cleared", `${roundsCleared}/${DAILY_RUN_LENGTH}`]].forEach(([label, value]) => {
@@ -1725,7 +1774,7 @@ function showWinScreen(round, finalScore) {
   el.winScreen.classList.remove("hidden");
 
   el.winHeading.textContent = `${formatLongDate(round.dateKey)} cleared`;
-  el.winSubtext.textContent = `All ${DAILY_RUN_LENGTH} rounds complete. Final score: ${finalScore}.`;
+  el.winSubtext.textContent = `You scored ${finalScore} on this daily run. Replay it anytime.`;
 
   el.winStatsGrid.innerHTML = "";
   [["Score", finalScore], ["Rounds", `${DAILY_RUN_LENGTH}/${DAILY_RUN_LENGTH}`], ["Final country", round.country]].forEach(([label, value]) => {
@@ -2232,6 +2281,14 @@ function syncApp() {
   renderRunStats();
   applyUnlockedRegions();
   drawShareCards();
+
+  if (state.savedDayResult && state.currentRound) {
+    if (state.savedDayResult.type === "win") {
+      showWinScreen(state.currentRound, state.savedDayResult.finalScore);
+    } else {
+      showLostScreen(state.currentRound, state.savedDayResult.finalScore, state.savedDayResult.roundsCleared);
+    }
+  }
 }
 
 el.showLoginButton?.addEventListener("click", () => setAuthMode("login"));
@@ -2251,7 +2308,7 @@ el.clueStack.addEventListener("click", handleClueClick);
 el.nextRoundButton.addEventListener("click", handleNextRound);
 el.dailySelect?.addEventListener("change", (event) => {
   setSelectedDateKey(event.target.value);
-  startFreshRun();
+  openSelectedDay();
 });
 el.lostNewRunButton.addEventListener("click", handleReplayDay);
 el.winNewRunButton.addEventListener("click", handleReplayDay);
