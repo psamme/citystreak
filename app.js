@@ -499,6 +499,7 @@ const state = {
   mapFocusTimer: null,
   outlineRetryTimer: null,
   outlineMetrics: {},
+  loadingRound: false,
   authOpen: false,
   selectedDateKey: "",
   savedDayResult: null
@@ -1053,7 +1054,7 @@ async function handleLogin(event) {
   setMessage("Progress now saves automatically on this device. No login needed.", "success");
 }
 
-function startFreshRun() {
+async function startFreshRun() {
   const user = currentPlayer();
   clearTimeout(state.autoAdvanceTimer);
   clearTimeout(state.revealTimer);
@@ -1063,13 +1064,13 @@ function startFreshRun() {
   user.stats.currentPuzzleScore = 0;
   user.stats.lastPlayedDate = state.selectedDateKey || todayDateKey();
   user.stats.latestRun = [];
-  savePlayerIfNeeded(user);
-  createRound(state.selectedDateKey || todayDateKey(), 1);
+  void savePlayerIfNeeded(user);
+  await createRound(state.selectedDateKey || todayDateKey(), 1);
 }
 
-function startRunFromUser() {
+async function startRunFromUser() {
   setSelectedDateKey(todayDateKey());
-  openSelectedDay();
+  await openSelectedDay();
 }
 
 async function createRound(dateKey, roundNumber = 1) {
@@ -1077,6 +1078,7 @@ async function createRound(dateKey, roundNumber = 1) {
   state.currentGuess = "";
   state.savedDayResult = null;
   state.currentRound = null;
+  state.loadingRound = true;
   setGuessMessage("Loading round...");
 
   try {
@@ -1095,6 +1097,8 @@ async function createRound(dateKey, roundNumber = 1) {
   } catch (error) {
     console.error(error);
     setGuessMessage("Could not load this round right now.", "error");
+  } finally {
+    state.loadingRound = false;
   }
 }
 
@@ -1240,7 +1244,7 @@ async function handleGuess(event) {
       clues: round.clues.slice(0, round.visibleClueCount).map((entry) => entry.city),
       points: awardedPoints
     });
-    savePlayerIfNeeded(user);
+    void savePlayerIfNeeded(user);
     applyUnlockedRegions();
     renderProfile();
     renderRunStats();
@@ -1264,7 +1268,7 @@ async function handleGuess(event) {
     }
 
     clearTimeout(state.autoAdvanceTimer);
-    state.autoAdvanceTimer = window.setTimeout(() => {
+    state.autoAdvanceTimer = window.setTimeout(async () => {
       const liveUser = currentPlayer();
       if (!liveUser) {
         return;
@@ -1279,14 +1283,13 @@ async function handleGuess(event) {
           completed: true,
           failed: false
         });
-        savePlayerIfNeeded(liveUser);
+        await savePlayerIfNeeded(liveUser);
         showWinScreen({ ...round, country, code }, liveUser.stats.currentPuzzleScore);
         return;
       }
 
-      savePlayerIfNeeded(liveUser);
-      createRound(round.dateKey, round.roundNumber + 1);
-      syncApp();
+      await savePlayerIfNeeded(liveUser);
+      await createRound(round.dateKey, round.roundNumber + 1);
     }, 1200);
     return;
   }
@@ -1311,7 +1314,7 @@ async function handleGuess(event) {
     completed: false,
     failed: true
   });
-  savePlayerIfNeeded(user);
+  void savePlayerIfNeeded(user);
   drawShareCards();
   renderRunStats();
   triggerAnswerPanelFeedback("error");
@@ -1333,13 +1336,13 @@ async function handleGuess(event) {
   }, 650);
 }
 
-function handleNextRound() {
+async function handleNextRound() {
   setSelectedDateKey(todayDateKey());
-  startFreshRun();
+  await startFreshRun();
 }
 
-function handleReplayDay() {
-  startFreshRun();
+async function handleReplayDay() {
+  await startFreshRun();
 }
 
 function showSavedDayResult(dateKey = state.selectedDateKey) {
@@ -1386,14 +1389,14 @@ function showSavedDayResult(dateKey = state.selectedDateKey) {
   return true;
 }
 
-function openSelectedDay() {
+async function openSelectedDay() {
   if (showSavedDayResult(state.selectedDateKey)) {
     renderDailyPicker();
     renderRunStats();
     return;
   }
 
-  startFreshRun();
+  await startFreshRun();
 }
 
 function handleRevealClue() {
@@ -2075,8 +2078,12 @@ function syncApp() {
     buildMaps();
   }
 
+  if (state.loadingRound) {
+    return;
+  }
+
   if (!state.currentRound) {
-    startRunFromUser();
+    void startRunFromUser();
     return;
   }
 
@@ -2138,9 +2145,9 @@ async function bootstrapApp() {
   }
 
   if (activeUser()) {
-    startRunFromUser();
+    await startRunFromUser();
   } else {
-    startFreshRun();
+    await startFreshRun();
   }
 
   syncApp();
