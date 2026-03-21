@@ -957,8 +957,24 @@ h3 {
 }
 
 #map .jsvmap-region,
+#game-map .jsvmap-region,
 #outline-source-map .jsvmap-region {
   transition: fill 220ms ease, stroke 220ms ease, filter 220ms ease;
+}
+
+#map .jsvmap-region[data-unlocked="true"],
+#game-map .jsvmap-region[data-unlocked="true"] {
+  fill: #3df4ff !important;
+  stroke: #eaffff !important;
+  stroke-width: 1.35 !important;
+  filter: drop-shadow(0 0 18px rgba(61, 244, 255, 0.82));
+}
+
+#map .jsvmap-region[data-unlocked="true"]:hover,
+#game-map .jsvmap-region[data-unlocked="true"]:hover {
+  fill: #74fff8 !important;
+  stroke: #ffffff !important;
+  filter: drop-shadow(0 0 24px rgba(116, 255, 248, 0.96));
 }
 
 .sidebar-outline-gallery {

@@ -725,6 +725,11 @@ const VISITOR_ID_KEY = "geostreak.visitorId.v1";
 const VISITOR_TRACKED_SESSION_KEY = "geostreak.visitorTracked.v1";
 const VISITOR_TRACKED_DATE_KEY = "geostreak.visitorTrackedDate.v1";
 const VISITOR_COOKIE_KEY = "geostreak_visitor_id";
+const LOCKED_REGION_FILL = "#101824";
+const LOCKED_REGION_STROKE = "rgba(255,255,255,0.12)";
+const UNLOCKED_REGION_FILL = "#3df4ff";
+const UNLOCKED_REGION_STROKE = "#eaffff";
+const UNLOCKED_REGION_GLOW = "drop-shadow(0 0 18px rgba(61,244,255,0.82))";
 
 function defaultStats() {
   return {
@@ -1847,13 +1852,7 @@ function showLostScreen(round, finalScore, roundsCleared) {
     el.lostStatsGrid.appendChild(card);
   });
 
-  if (state.mapReady) {
-    el.lostCountryOutline.innerHTML = countryOutlineSvg(round.code);
-  } else {
-    requestAnimationFrame(() => {
-      el.lostCountryOutline.innerHTML = countryOutlineSvg(round.code);
-    });
-  }
+  renderOutlineInto(el.lostCountryOutline, round.code);
 }
 
 function showWinScreen(round, finalScore) {
@@ -1874,13 +1873,7 @@ function showWinScreen(round, finalScore) {
     el.winStatsGrid.appendChild(card);
   });
 
-  if (state.mapReady) {
-    el.winCountryOutline.innerHTML = countryOutlineSvg(round.code);
-  } else {
-    requestAnimationFrame(() => {
-      el.winCountryOutline.innerHTML = countryOutlineSvg(round.code);
-    });
-  }
+  renderOutlineInto(el.winCountryOutline, round.code);
 }
 
 function renderSidebarOutlines() {
@@ -1912,6 +1905,21 @@ function renderSidebarOutlines() {
       renderSidebarOutlines();
     }, 120);
   }
+}
+
+function renderOutlineInto(container, code, attempts = 0) {
+  if (!container) return;
+
+  const markup = countryOutlineSvg(code);
+  container.innerHTML = markup;
+
+  if (markup || attempts >= 10) {
+    return;
+  }
+
+  requestAnimationFrame(() => {
+    renderOutlineInto(container, code, attempts + 1);
+  });
 }
 
 function showView(viewId) {
@@ -1949,14 +1957,20 @@ function mapOptions() {
     map: "world",
     zoomButtons: false,
     backgroundColor: "transparent",
+    regionsSelectable: true,
     regionStyle: {
       initial: {
-        fill: "#101824",
-        stroke: "rgba(255,255,255,0.12)",
+        fill: LOCKED_REGION_FILL,
+        stroke: LOCKED_REGION_STROKE,
         strokeWidth: 0.8
       },
       hover: {
         fill: "#21354a"
+      },
+      selected: {
+        fill: UNLOCKED_REGION_FILL,
+        stroke: UNLOCKED_REGION_STROKE,
+        strokeWidth: 1.35
       }
     }
   };
@@ -2024,10 +2038,18 @@ function regionElements(root) {
 
 function matchRegionCode(region, code) {
   const target = code.toUpperCase();
+  const classNameValue =
+    typeof region.className === "string"
+      ? region.className
+      : region.className?.baseVal || "";
   const regionCode =
     (region.dataset.code ||
       region.getAttribute("data-code") ||
       region.getAttribute("data-region") ||
+      region.getAttribute("name") ||
+      region.getAttribute("id") ||
+      region.getAttribute("class") ||
+      classNameValue ||
       region.getAttribute("id") ||
       "")
       .toUpperCase();
@@ -2036,7 +2058,7 @@ function matchRegionCode(region, code) {
     return true;
   }
 
-  const className = typeof region.className === "string" ? region.className.toUpperCase() : "";
+  const className = classNameValue.toUpperCase();
   return className.includes(target);
 }
 
@@ -2059,18 +2081,35 @@ function allMapRoots() {
   return [el.map, el.gameMap].filter(Boolean);
 }
 
+function allMapInstances() {
+  return [state.profileMap, state.gameMap].filter(Boolean);
+}
+
+function paintRegion(region, unlocked) {
+  region.dataset.unlocked = unlocked ? "true" : "false";
+  region.classList.toggle("is-unlocked-region", unlocked);
+  region.style.fill = unlocked ? UNLOCKED_REGION_FILL : LOCKED_REGION_FILL;
+  region.style.stroke = unlocked ? UNLOCKED_REGION_STROKE : LOCKED_REGION_STROKE;
+  region.style.strokeWidth = unlocked ? "1.35" : "0.8";
+  region.style.filter = unlocked ? UNLOCKED_REGION_GLOW : "none";
+  region.style.opacity = unlocked ? "1" : "";
+}
+
 function applyUnlockedRegions() {
   const user = activeUser();
   if (!state.mapReady || !user) return;
 
   const unlockedCodes = user.stats.countriesSolved.map((entry) => entry.code.toUpperCase());
+  allMapInstances().forEach((mapInstance) => {
+    if (typeof mapInstance.setSelectedRegions === "function") {
+      mapInstance.setSelectedRegions(unlockedCodes);
+    }
+  });
+
   allMapRoots().forEach((root) => {
     regionElements(root).forEach((region) => {
       const selected = unlockedCodes.some((code) => matchRegionCode(region, code));
-      region.style.fill = selected ? "#9feeff" : "#101824";
-      region.style.stroke = selected ? "rgba(159,238,255,0.98)" : "rgba(255,255,255,0.12)";
-      region.style.strokeWidth = selected ? "1.25" : "0.8";
-      region.style.filter = selected ? "drop-shadow(0 0 14px rgba(159,238,255,0.42))" : "none";
+      paintRegion(region, selected);
     });
   });
 }
@@ -2086,9 +2125,9 @@ function flashRegion(code) {
 
     region.animate(
       [
-        { fill: "#8affc7", opacity: 0.9, filter: "drop-shadow(0 0 0 rgba(105,227,255,0))" },
-        { fill: "#d7fff0", opacity: 1, filter: "drop-shadow(0 0 22px rgba(105,227,255,0.85))" },
-        { fill: "#69e3ff", opacity: 1, filter: "drop-shadow(0 0 14px rgba(105,227,255,0.4))" }
+        { fill: "#74fff1", opacity: 0.92, filter: "drop-shadow(0 0 0 rgba(61,244,255,0))" },
+        { fill: "#ffffff", opacity: 1, filter: "drop-shadow(0 0 28px rgba(61,244,255,1))" },
+        { fill: UNLOCKED_REGION_FILL, opacity: 1, filter: UNLOCKED_REGION_GLOW }
       ],
       { duration: 900, easing: "ease-out" }
     );
@@ -2118,10 +2157,10 @@ function focusGameMapOnCountry(code) {
   regionElements(el.gameMap).forEach((entry) => entry.classList.remove("focus-target"));
   el.gameMap.classList.add("is-focusing");
   region.classList.add("focus-target");
-  region.style.fill = "#8eefff";
-  region.style.stroke = "#d9ffff";
-  region.style.strokeWidth = "1.45";
-  region.style.filter = "drop-shadow(0 0 24px rgba(105,227,255,0.95))";
+  region.style.fill = UNLOCKED_REGION_FILL;
+  region.style.stroke = UNLOCKED_REGION_STROKE;
+  region.style.strokeWidth = "1.55";
+  region.style.filter = "drop-shadow(0 0 28px rgba(61,244,255,1))";
   svg.style.transformOrigin = `${centerX}px ${centerY}px`;
   svg.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
 
@@ -2157,6 +2196,18 @@ function getWorldPathString(code) {
   return record.path || "";
 }
 
+function hasUsableOutlineBox(box) {
+  return Boolean(
+    box &&
+      Number.isFinite(box.x) &&
+      Number.isFinite(box.y) &&
+      Number.isFinite(box.width) &&
+      Number.isFinite(box.height) &&
+      box.width > 0.5 &&
+      box.height > 0.5
+  );
+}
+
 function measureCountryPath(code) {
   const upperCode = code.toUpperCase();
   if (state.outlineMetrics[upperCode]) {
@@ -2168,17 +2219,20 @@ function measureCountryPath(code) {
     const renderedPath = renderedRegion.getAttribute("d");
     if (renderedPath) {
       const box = renderedRegion.getBBox();
-      const metrics = {
-        pathData: renderedPath,
-        box: {
-          x: box.x,
-          y: box.y,
-          width: box.width,
-          height: box.height
-        }
+      const measuredBox = {
+        x: box.x,
+        y: box.y,
+        width: box.width,
+        height: box.height
       };
-      state.outlineMetrics[upperCode] = metrics;
-      return metrics;
+      if (hasUsableOutlineBox(measuredBox)) {
+        const metrics = {
+          pathData: renderedPath,
+          box: measuredBox
+        };
+        state.outlineMetrics[upperCode] = metrics;
+        return metrics;
+      }
     }
   }
 
@@ -2199,16 +2253,21 @@ function measureCountryPath(code) {
   el.outlineSourceMap.appendChild(svg);
 
   const box = path.getBBox();
-  const metrics = {
-    pathData,
-    box: {
-      x: box.x,
-      y: box.y,
-      width: box.width,
-      height: box.height
-    }
+  const measuredBox = {
+    x: box.x,
+    y: box.y,
+    width: box.width,
+    height: box.height
   };
 
+  if (!hasUsableOutlineBox(measuredBox)) {
+    return null;
+  }
+
+  const metrics = {
+    pathData,
+    box: measuredBox
+  };
   state.outlineMetrics[upperCode] = metrics;
   return metrics;
 }
@@ -2271,7 +2330,7 @@ function countryOutlineSvg(code) {
     Math.max(28, metrics.box.height + padding * 2)
   ].join(" ");
 
-  return `<svg viewBox="${viewBox}" role="img" aria-label="${code} outline"><path d="${metrics.pathData}"></path></svg>`;
+  return `<svg viewBox="${viewBox}" role="img" aria-label="${code} outline" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"><path d="${metrics.pathData}"></path></svg>`;
 }
 
 function drawShareCards() {
