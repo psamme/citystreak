@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GeoStreak Outline Test</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at top, rgba(159, 238, 255, 0.14), transparent 34%),
+          linear-gradient(180deg, #071019, #03070b 72%);
+        color: #eef7ff;
+        font-family: Georgia, "Times New Roman", serif;
+      }
+
+      .panel {
+        width: min(92vw, 760px);
+        padding: 28px;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(9, 15, 22, 0.88);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(2rem, 4vw, 3rem);
+      }
+
+      p {
+        margin: 0 0 20px;
+        color: rgba(238, 247, 255, 0.76);
+      }
+
+      .outline-wrap {
+        min-height: 320px;
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at center, rgba(105, 227, 255, 0.1), transparent 58%),
+          rgba(255, 255, 255, 0.025);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .outline-wrap svg {
+        width: min(100%, 520px);
+        height: min(60vh, 360px);
+      }
+
+      .outline-wrap path {
+        fill: rgba(159, 238, 255, 0.16);
+        stroke: #9feeff;
+        stroke-width: 1.8;
+        vector-effect: non-scaling-stroke;
+      }
+
+      #outline-source-map {
+        position: fixed;
+        left: -9999px;
+        top: -9999px;
+        width: 1200px;
+        height: 700px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .status {
+        margin-top: 16px;
+        font-size: 0.98rem;
+        color: rgba(238, 247, 255, 0.7);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="panel">
+      <h1>Mauritania outline test</h1>
+      <p>This page renders the `MR` country shape directly from the same jsVectorMap world data the app uses.</p>
+      <div class="outline-wrap" id="outline-wrap"></div>
+      <div class="status" id="status"></div>
+    </main>
+
+    <div id="outline-source-map" aria-hidden="true"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"></script>
+    <script>
+      const statusEl = document.getElementById("status");
+      const outlineWrap = document.getElementById("outline-wrap");
+      const sourceMap = document.getElementById("outline-source-map");
+
+      function getWorldPathString(code) {
+        const worldMapData =
+          (typeof jsVectorMap !== "undefined" && jsVectorMap.maps && jsVectorMap.maps.world) || null;
+        if (!worldMapData || !worldMapData.paths) {
+          return "";
+        }
+
+        const record = worldMapData.paths[code.toUpperCase()] || null;
+        if (!record) {
+          return "";
+        }
+
+        return typeof record === "string" ? record : record.path || "";
+      }
+
+      function renderOutline(code) {
+        const pathData = getWorldPathString(code);
+        if (!pathData) {
+          statusEl.textContent = "No path data was found for this country code.";
+          return;
+        }
+
+        const ns = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(ns, "svg");
+        const path = document.createElementNS(ns, "path");
+        svg.setAttribute("viewBox", "0 0 1200 700");
+        path.setAttribute("d", pathData);
+        svg.appendChild(path);
+        sourceMap.innerHTML = "";
+        sourceMap.appendChild(svg);
+
+        const box = path.getBBox();
+        const padding = 10;
+        const finalViewBox = [
+          box.x - padding,
+          box.y - padding,
+          Math.max(28, box.width + padding * 2),
+          Math.max(28, box.height + padding * 2)
+        ].join(" ");
+
+        outlineWrap.innerHTML = `<svg viewBox="${finalViewBox}" role="img" aria-label="Mauritania outline"><path d="${pathData}"></path></svg>`;
+        statusEl.textContent = `Rendered MR from jsVectorMap world data. Bounds: ${box.width.toFixed(1)} × ${box.height.toFixed(1)}.`;
+      }
+
+      renderOutline("MR");
+    </script>
+  </body>
+</html>
