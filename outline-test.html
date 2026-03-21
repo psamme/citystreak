@@ -78,6 +78,16 @@
         font-size: 0.98rem;
         color: rgba(238, 247, 255, 0.7);
       }
+
+      #debug-map {
+        position: fixed;
+        left: -9999px;
+        top: -9999px;
+        width: 1200px;
+        height: 700px;
+        opacity: 0;
+        pointer-events: none;
+      }
     </style>
   </head>
   <body>
@@ -89,6 +99,7 @@
     </main>
 
     <div id="outline-source-map" aria-hidden="true"></div>
+    <div id="debug-map" aria-hidden="true"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"></script>
@@ -96,26 +107,41 @@
       const statusEl = document.getElementById("status");
       const outlineWrap = document.getElementById("outline-wrap");
       const sourceMap = document.getElementById("outline-source-map");
+      const debugMapEl = document.getElementById("debug-map");
 
-      function getWorldPathString(code) {
-        const worldMapData =
-          (typeof jsVectorMap !== "undefined" && jsVectorMap.maps && jsVectorMap.maps.world) || null;
-        if (!worldMapData || !worldMapData.paths) {
-          return "";
+      function matchRegionCode(region, code) {
+        const target = code.toUpperCase();
+        const regionCode =
+          (region.dataset.code ||
+            region.getAttribute("data-code") ||
+            region.getAttribute("data-region") ||
+            region.getAttribute("id") ||
+            "")
+            .toUpperCase();
+
+        if (regionCode === target || regionCode.endsWith(`-${target}`)) {
+          return true;
         }
 
-        const record = worldMapData.paths[code.toUpperCase()] || null;
-        if (!record) {
-          return "";
-        }
-
-        return typeof record === "string" ? record : record.path || "";
+        const className = typeof region.className === "string" ? region.className.toUpperCase() : "";
+        return className.includes(target);
       }
 
       function renderOutline(code) {
-        const pathData = getWorldPathString(code);
+        const map = new jsVectorMap({
+          selector: "#debug-map",
+          map: "world",
+          zoomButtons: false,
+          backgroundColor: "transparent"
+        });
+
+        const region = Array.from(debugMapEl.querySelectorAll(".jsvmap-region")).find((entry) => matchRegionCode(entry, code));
+        const pathData = region?.getAttribute("d") || "";
         if (!pathData) {
           statusEl.textContent = "No path data was found for this country code.";
+          if (map?.destroy) {
+            map.destroy();
+          }
           return;
         }
 
@@ -139,6 +165,9 @@
 
         outlineWrap.innerHTML = `<svg viewBox="${finalViewBox}" role="img" aria-label="Mauritania outline"><path d="${pathData}"></path></svg>`;
         statusEl.textContent = `Rendered MR from jsVectorMap world data. Bounds: ${box.width.toFixed(1)} × ${box.height.toFixed(1)}.`;
+        if (map?.destroy) {
+          map.destroy();
+        }
       }
 
       renderOutline("MR");

@@ -2027,8 +2027,19 @@ function matchRegionCode(region, code) {
   return className.includes(target);
 }
 
-function findRenderedRegion(code, root = el.map) {
-  return regionElements(root).find((region) => matchRegionCode(region, code)) || null;
+function findRenderedRegion(code, root = null) {
+  if (root) {
+    return regionElements(root).find((region) => matchRegionCode(region, code)) || null;
+  }
+
+  for (const mapRoot of allMapRoots()) {
+    const region = regionElements(mapRoot).find((entry) => matchRegionCode(entry, code));
+    if (region) {
+      return region;
+    }
+  }
+
+  return null;
 }
 
 function allMapRoots() {
