@@ -30,10 +30,12 @@ module.exports = function handler(req, res) {
     return;
   }
 
-  const serialized = serializeRound(round);
+  const nextVisibleClueCount = payload.visibleClueCount + 1;
+  const serialized = serializeRound(round, nextVisibleClueCount);
   res.status(200).json({
-    visibleClueCount: payload.visibleClueCount + 1,
+    visibleClueCount: nextVisibleClueCount,
     clues: serialized.clues,
+    totalClueCount: serialized.totalClueCount,
     token: issueRevealToken(payload)
   });
 };
