@@ -127,7 +127,7 @@
         return className.includes(target);
       }
 
-      function renderOutline(code) {
+      function renderOutline(code, attemptsRemaining = 12) {
         const map = new jsVectorMap({
           selector: "#debug-map",
           map: "world",
@@ -138,10 +138,15 @@
         const region = Array.from(debugMapEl.querySelectorAll(".jsvmap-region")).find((entry) => matchRegionCode(entry, code));
         const pathData = region?.getAttribute("d") || "";
         if (!pathData) {
-          statusEl.textContent = "No path data was found for this country code.";
           if (map?.destroy) {
             map.destroy();
           }
+          if (attemptsRemaining > 0) {
+            statusEl.textContent = "Waiting for map regions to render...";
+            window.setTimeout(() => renderOutline(code, attemptsRemaining - 1), 120);
+            return;
+          }
+          statusEl.textContent = "No path data was found for this country code.";
           return;
         }
 

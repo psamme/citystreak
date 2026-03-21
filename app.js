@@ -914,6 +914,7 @@ const state = {
   feedbackTimer: null,
   revealTimer: null,
   mapFocusTimer: null,
+  outlineRetryTimer: null,
   outlineMetrics: {},
   authOpen: false,
   selectedDateKey: "",
@@ -1892,13 +1893,25 @@ function renderSidebarOutlines() {
   }
 
   el.sidebarOutlineGallery.innerHTML = "";
+  let missingOutline = false;
   user.stats.countriesSolved.forEach((entry) => {
+    const outlineSvg = countryOutlineSvg(entry.code);
+    if (!outlineSvg) {
+      missingOutline = true;
+    }
     const item = document.createElement("div");
     item.className = "sidebar-outline-item";
     item.title = entry.country;
-    item.innerHTML = countryOutlineSvg(entry.code);
+    item.innerHTML = outlineSvg;
     el.sidebarOutlineGallery.appendChild(item);
   });
+
+  if (missingOutline) {
+    clearTimeout(state.outlineRetryTimer);
+    state.outlineRetryTimer = window.setTimeout(() => {
+      renderSidebarOutlines();
+    }, 120);
+  }
 }
 
 function showView(viewId) {
@@ -2215,10 +2228,15 @@ function renderCountryOutlines(countries) {
     return;
   }
 
+  let missingOutline = false;
   countries
     .slice()
     .sort((a, b) => a.country.localeCompare(b.country))
     .forEach((entry) => {
+      const outlineSvg = countryOutlineSvg(entry.code);
+      if (!outlineSvg) {
+        missingOutline = true;
+      }
       const card = document.createElement("article");
       card.className = "outline-card";
       card.innerHTML = `
@@ -2226,10 +2244,17 @@ function renderCountryOutlines(countries) {
           <strong>${entry.country}</strong>
           <span>Correct guess</span>
         </div>
-        <div class="outline-art">${countryOutlineSvg(entry.code)}</div>
+        <div class="outline-art">${outlineSvg}</div>
       `;
       el.countryOutlineGallery.appendChild(card);
     });
+
+  if (missingOutline) {
+    clearTimeout(state.outlineRetryTimer);
+    state.outlineRetryTimer = window.setTimeout(() => {
+      renderCountryOutlines(countries);
+    }, 120);
+  }
 }
 
 function countryOutlineSvg(code) {
