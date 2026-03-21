@@ -1075,13 +1075,17 @@ function renderDailyPicker() {
   }
 
   const user = currentPlayer();
-  const allScores = Object.values(user?.stats.dailyHistory || {})
+  const bestEntry = Object.values(user?.stats.dailyHistory || {})
     .slice()
-    .sort((left, right) => right.dateKey.localeCompare(left.dateKey))
-    .map((entry) => `${formatLongDate(entry.dateKey)}: ${entry.score} pts`);
+    .sort((left, right) => {
+      if (right.score !== left.score) return right.score - left.score;
+      return left.dateKey.localeCompare(right.dateKey);
+    })[0];
 
   const firstPlayedOn = result.firstPlayedOn || state.selectedDateKey;
-  el.dailyStatus.innerHTML = `First played on ${formatLongDate(firstPlayedOn)}<br>${allScores.join("<br>")}`;
+  el.dailyStatus.innerHTML = `First played on ${formatLongDate(firstPlayedOn)}${
+    bestEntry ? `<br>High Score: ${formatLongDate(bestEntry.dateKey)}: ${bestEntry.score} pts` : ""
+  }`;
 }
 
 function recordDailyResult(user, round, payload) {
