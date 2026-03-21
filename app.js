@@ -837,10 +837,6 @@ const el = {
   dailySelect: document.getElementById("daily-select"),
   dailyStatus: document.getElementById("daily-status"),
   runStatsGrid: document.getElementById("run-stats-grid"),
-  profileTitle: document.getElementById("profile-title"),
-  profileSubtitle: document.getElementById("profile-subtitle"),
-  profileRank: document.getElementById("profile-rank"),
-  profileCountryCount: document.getElementById("profile-country-count"),
   countryOutlineGallery: document.getElementById("country-outline-gallery"),
   shareCanvas: document.getElementById("share-canvas"),
   map: document.getElementById("map"),
@@ -1335,8 +1331,9 @@ function bumpStreakBar() {
 }
 
 function updateRoundProgress(_user, round) {
-  const progress = Math.max(10, Math.min(100, (round.roundNumber / DAILY_RUN_LENGTH) * 100));
-  el.roundProgressLabel.textContent = `Round ${round.roundNumber} of ${DAILY_RUN_LENGTH}`;
+  const completedRounds = Math.max(0, round.roundNumber - (round.answered ? 0 : 1));
+  const progress = Math.max(0, Math.min(100, (completedRounds / DAILY_RUN_LENGTH) * 100));
+  el.roundProgressLabel.textContent = `${completedRounds} of ${DAILY_RUN_LENGTH} completed`;
   el.roundProgressFill.style.width = `${progress}%`;
 }
 
@@ -1743,23 +1740,9 @@ function showView(viewId) {
   }
 }
 
-function getRank(countryCount) {
-  if (countryCount >= 12) return "Atlas Savant";
-  if (countryCount >= 8) return "Border Archivist";
-  if (countryCount >= 5) return "Night Navigator";
-  if (countryCount >= 3) return "Map Hunter";
-  return "Rookie Cartographer";
-}
-
 function renderProfile() {
   const user = activeUser();
   if (!user) return;
-
-  const countryCount = user.stats.countriesSolved.length;
-  el.profileTitle.textContent = `${user.displayName}'s archive`;
-  el.profileSubtitle.textContent = `Stored on this device · Solve the daily puzzle and revisit older days anytime.`;
-  el.profileRank.textContent = getRank(countryCount);
-  el.profileCountryCount.textContent = `${countryCount} country outline${countryCount === 1 ? "" : "s"} unlocked`;
 
   renderCountryOutlines(user.stats.countriesSolved);
 }
