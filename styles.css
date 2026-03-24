@@ -124,7 +124,7 @@ h2 {
 h1 {
   font-size: clamp(1.4rem, 3.5vw, 2.6rem);
   max-width: none;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 h2 {
@@ -1055,6 +1055,8 @@ h3 {
   font: inherit;
   line-height: 1.55;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .lost-share {
@@ -1520,8 +1522,38 @@ button:active {
     grid-template-columns: 1fr;
   }
 
+  .topbar-nav,
+  .hero-actions {
+    width: 100%;
+  }
+
+  .topbar-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .topbar-nav .nav-button,
+  .hero-actions .primary-button,
+  .hero-actions .ghost-button {
+    width: 100%;
+  }
+
+  .panel-header,
+  .panel-header.compact {
+    gap: 10px;
+    align-items: start;
+  }
+
+  .lost-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
   .country-outline-gallery {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .outline-card {
+    padding: 14px;
   }
 
   .answer-panel {
@@ -1533,11 +1565,60 @@ button:active {
     min-height: 58px;
   }
 
+  h3 {
+    font-size: 1.4rem;
+  }
+
+  .share-preview {
+    padding: 14px;
+    font-size: 0.98rem;
+  }
+
   .game-map-frame {
     height: 180px;
   }
 
   .outline-art {
-    height: 92px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .app-shell {
+    width: min(100% - 12px, 1440px);
+  }
+
+  .topbar,
+  .auth-panel,
+  .hero,
+  .game-panel,
+  .map-panel,
+  .run-panel,
+  .stats-panel,
+  .profile-hero,
+  .full-profile-panel {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .country-outline-gallery {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .outline-meta strong {
+    font-size: 0.92rem;
+  }
+
+  .large-input,
+  .guess-input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .daily-toolbar .supporting-text,
+  .supporting-text,
+  .feedback {
+    overflow-wrap: anywhere;
   }
 }

@@ -802,6 +802,7 @@ function renderSharePanel(dateKey, previewEl, feedbackEl) {
 
   const shareText = user ? shareTextForDate(user, dateKey) : "";
   previewEl.textContent = shareText;
+  previewEl.classList.add("hidden");
   if (feedbackEl) {
     feedbackEl.textContent = "";
     feedbackEl.className = "feedback";
@@ -815,6 +816,7 @@ async function copyShareText(dateKey, feedbackEl, previewEl) {
   const shareText = shareTextForDate(user, dateKey);
   if (previewEl) {
     previewEl.textContent = shareText;
+    previewEl.classList.remove("hidden");
   }
 
   try {
@@ -1235,7 +1237,44 @@ async function createRound(dateKey, roundNumber = 1) {
 }
 
 function isShowingSavedDayResult() {
-  return Boolean(state.savedDayResult && state.currentRound);
+  return Boolean(state.savedDayResult);
+}
+
+function hydrateSavedResultRound(dateKey = state.currentRound?.dateKey || state.selectedDateKey) {
+  const result = currentPuzzleResult(dateKey);
+  if (!result || (!result.completed && !result.failed)) {
+    return state.currentRound;
+  }
+
+  const roundNumber = result.completed ? DAILY_RUN_LENGTH : Math.max(1, result.roundsCleared + 1);
+  return {
+    dateKey,
+    roundNumber,
+    puzzleNumber: puzzleIndexForDate(dateKey) + 1,
+    country: result.country || "",
+    code: result.code || "",
+    answered: true,
+    visibleClueCount: 5,
+    totalClueCount: 5,
+    clues: [],
+    token: ""
+  };
+}
+
+function renderSavedDayResultScreen(dateKey = state.currentRound?.dateKey || state.selectedDateKey) {
+  const round = hydrateSavedResultRound(dateKey);
+  if (!round || !state.savedDayResult) {
+    return false;
+  }
+
+  state.currentRound = round;
+  if (state.savedDayResult.type === "win") {
+    showWinScreen(round, state.savedDayResult.finalScore);
+  } else {
+    showLostScreen(round, state.savedDayResult.finalScore, state.savedDayResult.roundsCleared);
+  }
+
+  return true;
 }
 
 function pointsForVisibleClues(round) {
@@ -1689,11 +1728,7 @@ function showView(viewId) {
   }
 
   if (viewId === "game-view" && isShowingSavedDayResult()) {
-    if (state.savedDayResult.type === "win") {
-      showWinScreen(state.currentRound, state.savedDayResult.finalScore);
-    } else {
-      showLostScreen(state.currentRound, state.savedDayResult.finalScore, state.savedDayResult.roundsCleared);
-    }
+    renderSavedDayResultScreen();
   }
 }
 
@@ -2282,11 +2317,7 @@ function syncApp() {
   drawShareCards();
 
   if (isShowingSavedDayResult()) {
-    if (state.savedDayResult.type === "win") {
-      showWinScreen(state.currentRound, state.savedDayResult.finalScore);
-    } else {
-      showLostScreen(state.currentRound, state.savedDayResult.finalScore, state.savedDayResult.roundsCleared);
-    }
+    renderSavedDayResultScreen();
     return;
   }
 
