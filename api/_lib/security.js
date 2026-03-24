@@ -2,6 +2,14 @@ const crypto = require("crypto");
 
 const TOKEN_SECRET = process.env.GEOSTREAK_TOKEN_SECRET || "dev-token-secret-change-me";
 const RATE_LIMIT = new Map();
+const IS_PRODUCTION =
+  process.env.NODE_ENV === "production" ||
+  process.env.VERCEL_ENV === "production" ||
+  process.env.VERCEL === "1";
+
+if (IS_PRODUCTION && (!process.env.GEOSTREAK_TOKEN_SECRET || process.env.GEOSTREAK_TOKEN_SECRET === "dev-token-secret-change-me")) {
+  throw new Error("GEOSTREAK_TOKEN_SECRET must be set in production");
+}
 
 function base64url(input) {
   return Buffer.from(input)

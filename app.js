@@ -754,10 +754,6 @@ function recordDailyResult(user, round, payload) {
   user.stats.dailyHistory[round.dateKey] = nextEntry;
   user.stats.lastPlayedDate = round.dateKey;
 
-  if (!previous && nextEntry.completed) {
-    user.stats.dailyCompleted += 1;
-  }
-
   if (!previous?.completed && nextEntry.completed) {
     user.stats.dailyCompleted += 1;
   }
