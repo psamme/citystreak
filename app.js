@@ -519,7 +519,6 @@ const el = {
   profileView: document.getElementById("profile-view"),
   runHeading: document.getElementById("run-heading"),
   runSubtext: document.getElementById("run-subtext"),
-  scorePill: document.getElementById("score-pill"),
   gamePanel: document.getElementById("game-panel"),
   clueStack: document.getElementById("clue-stack"),
   countryGuessForm: document.getElementById("country-guess-form"),
@@ -1883,6 +1882,41 @@ function mapOptions() {
   };
 }
 
+function mapCountryNameForCode(code) {
+  const upperCode = String(code || "").toUpperCase();
+  const worldMapData = (typeof jsVectorMap !== "undefined" && jsVectorMap.maps && jsVectorMap.maps.world) || null;
+  const worldPath = worldMapData?.paths?.[upperCode] || null;
+  if (worldPath && typeof worldPath === "object" && typeof worldPath.name === "string") {
+    return worldPath.name;
+  }
+
+  const knownRound = COUNTRY_ROUNDS.find((entry) => entry.code === upperCode);
+  return knownRound?.country || "";
+}
+
+function handleGameMapRegionClick(event, code) {
+  if (event?.preventDefault) {
+    event.preventDefault();
+  }
+
+  if (!el.countryGuessInput || el.countryGuessInput.disabled) {
+    return;
+  }
+
+  const countryName = mapCountryNameForCode(code);
+  if (!countryName) {
+    return;
+  }
+
+  state.currentGuess = countryName;
+  el.countryGuessInput.value = countryName;
+  renderCountrySuggestions();
+  hideCountrySuggestions();
+  el.countryPreview.textContent = countryName;
+  el.countryGuessInput.focus();
+  setGuessMessage(`Selected ${countryName} from the map.`);
+}
+
 function buildProfileMap() {
   if (!el.map || el.profileView?.classList.contains("hidden")) return;
   el.map.innerHTML = "";
@@ -1897,7 +1931,11 @@ function buildGameMap() {
   el.gameMap.innerHTML = "";
   state.gameMap = new jsVectorMap({
     selector: "#game-map",
-    ...mapOptions()
+    ...mapOptions(),
+    zoomButtons: true,
+    zoomOnScroll: true,
+    regionsSelectable: false,
+    onRegionClick: handleGameMapRegionClick
   });
 }
 
