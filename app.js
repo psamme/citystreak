@@ -463,6 +463,7 @@ const el = {
   map: document.getElementById("map"),
   gameMap: document.getElementById("game-map"),
   outlineSourceMap: document.getElementById("outline-source-map"),
+  outlineDebugMap: document.getElementById("outline-debug-map"),
   guessLayout: document.getElementById("guess-layout"),
   lostScreen: document.getElementById("lost-screen"),
   winScreen: document.getElementById("win-screen"),
@@ -491,6 +492,7 @@ const state = {
   currentGuess: "",
   profileMap: null,
   gameMap: null,
+  outlineDebugMap: null,
   mapReady: false,
   mapsBuilt: false,
   autoAdvanceTimer: null,
@@ -565,7 +567,7 @@ function syncAchievedCountries(player = currentPlayer()) {
   const solvedCountries = normalizedSolvedCountries(player?.stats?.countriesSolved);
   const nextCountries = solvedCountries.map((entry) => ({
     ...entry,
-    polygon: getWorldPathString(entry.code)
+    polygon: resolveCountryPathData(entry.code)
   }));
 
   state.achievedCountries = nextCountries;
@@ -1651,8 +1653,21 @@ function buildGameMap() {
   });
 }
 
+function buildOutlineDebugMap() {
+  if (!el.outlineDebugMap) return;
+  el.outlineDebugMap.innerHTML = "";
+  state.outlineDebugMap = new jsVectorMap({
+    selector: "#outline-debug-map",
+    map: "world",
+    zoomButtons: false,
+    backgroundColor: "transparent",
+    regionsSelectable: false
+  });
+}
+
 function buildMaps() {
   buildGameMap();
+  buildOutlineDebugMap();
   if (!el.profileView?.classList.contains("hidden")) {
     buildProfileMap();
   }
@@ -1735,11 +1750,11 @@ function findRenderedRegion(code, root = null) {
 }
 
 function allMapRoots() {
-  return [el.map, el.gameMap].filter(Boolean);
+  return [el.map, el.gameMap, el.outlineDebugMap].filter(Boolean);
 }
 
 function allMapInstances() {
-  return [state.profileMap, state.gameMap].filter(Boolean);
+  return [state.profileMap, state.gameMap, state.outlineDebugMap].filter(Boolean);
 }
 
 function paintRegion(region, unlocked) {
@@ -1853,6 +1868,15 @@ function getWorldPathString(code) {
   return record.path || "";
 }
 
+function findRegionPathData(code) {
+  const renderedRegion = findRenderedRegion(code);
+  return renderedRegion?.getAttribute("d") || "";
+}
+
+function resolveCountryPathData(code) {
+  return findRegionPathData(code) || getWorldPathString(code);
+}
+
 function hasUsableOutlineBox(box) {
   return Boolean(
     box &&
@@ -1893,7 +1917,7 @@ function measureCountryPath(code) {
     }
   }
 
-  const pathData = getWorldPathString(upperCode);
+  const pathData = resolveCountryPathData(upperCode);
   if (!pathData) {
     return null;
   }
@@ -1992,11 +2016,11 @@ function renderOutlinePreviewCard() {
 function countryOutlineSvg(entryOrCode) {
   const entry =
     typeof entryOrCode === "string"
-      ? { code: entryOrCode.toUpperCase(), polygon: getWorldPathString(entryOrCode) }
+      ? { code: entryOrCode.toUpperCase(), polygon: resolveCountryPathData(entryOrCode) }
       : {
           ...entryOrCode,
           code: (entryOrCode?.code || "").toUpperCase(),
-          polygon: entryOrCode?.polygon || getWorldPathString(entryOrCode?.code || "")
+          polygon: entryOrCode?.polygon || resolveCountryPathData(entryOrCode?.code || "")
         };
 
   if (!entry.code || !entry.polygon) {
