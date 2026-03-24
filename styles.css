@@ -1045,6 +1045,18 @@ h3 {
   gap: 16px;
 }
 
+.share-preview {
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.025);
+  color: rgba(238, 247, 255, 0.92);
+  font: inherit;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
 .lost-share {
   grid-column: 1 / -1;
 }

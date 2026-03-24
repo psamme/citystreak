@@ -472,11 +472,17 @@ const el = {
   lostStatsGrid: document.getElementById("lost-stats-grid"),
   lostCountryOutline: document.getElementById("lost-country-outline"),
   lostNewRunButton: document.getElementById("lost-new-run-button"),
+  lostShareButton: document.getElementById("lost-share-button"),
+  lostSharePreview: document.getElementById("lost-share-preview"),
+  lostShareFeedback: document.getElementById("lost-share-feedback"),
   winHeading: document.getElementById("win-heading"),
   winSubtext: document.getElementById("win-subtext"),
   winStatsGrid: document.getElementById("win-stats-grid"),
   winCountryOutline: document.getElementById("win-country-outline"),
   winNewRunButton: document.getElementById("win-new-run-button"),
+  winShareButton: document.getElementById("win-share-button"),
+  winSharePreview: document.getElementById("win-share-preview"),
+  winShareFeedback: document.getElementById("win-share-feedback"),
   signupConfirmPassword: document.getElementById("signup-confirm-password"),
   sidebarOutlineGallery: document.getElementById("sidebar-outline-gallery")
 };
@@ -739,6 +745,7 @@ function recordDailyResult(user, round, payload) {
     completed: Boolean(payload.completed),
     failed: Boolean(payload.failed),
     visibleClueCount: round.visibleClueCount,
+    runDetails: Array.isArray(payload.runDetails) ? payload.runDetails : previous?.runDetails || [],
     firstPlayedOn: previous?.firstPlayedOn || todayDateKey(),
     highScore,
     highScoreDate
@@ -757,6 +764,84 @@ function recordDailyResult(user, round, payload) {
 
   if (previous?.completed && !nextEntry.completed) {
     user.stats.dailyCompleted = Math.max(0, user.stats.dailyCompleted - 1);
+  }
+}
+
+function currentRunDetails(user, dateKey) {
+  return (user?.stats?.latestRun || [])
+    .filter((entry) => entry.dateKey === dateKey)
+    .slice()
+    .sort((a, b) => (a.roundNumber || 0) - (b.roundNumber || 0))
+    .map((entry) => ({
+      roundNumber: entry.roundNumber || 0,
+      clueCount: Array.isArray(entry.clues) ? entry.clues.length : 0,
+      failed: Boolean(entry.failed)
+    }));
+}
+
+function shareRowForDetail(detail) {
+  const clueCount = Math.max(1, Number(detail?.clueCount) || 1);
+  if (detail?.failed) {
+    return `${"🟡".repeat(Math.max(0, clueCount - 1))}🔴`;
+  }
+  return `${"🟡".repeat(Math.max(0, clueCount - 1))}🟢`;
+}
+
+function shareTextForDate(user, dateKey) {
+  const result = user?.stats?.dailyHistory?.[dateKey] || null;
+  const runDetails = Array.isArray(result?.runDetails) && result.runDetails.length ? result.runDetails : currentRunDetails(user, dateKey);
+  const totalPoints = typeof result?.score === "number" ? result.score : user?.stats?.currentPuzzleScore || 0;
+  const lines = runDetails.map((detail, index) => `${index + 1}. ${shareRowForDetail(detail)}`);
+
+  return `Geostreak ${formatLongDate(dateKey)}\n\n${lines.join("\n")}\n\nTotal Points: ${totalPoints}`;
+}
+
+function renderSharePanel(dateKey, previewEl, feedbackEl) {
+  const user = currentPlayer();
+  if (!previewEl) return;
+
+  const shareText = user ? shareTextForDate(user, dateKey) : "";
+  previewEl.textContent = shareText;
+  if (feedbackEl) {
+    feedbackEl.textContent = "";
+    feedbackEl.className = "feedback";
+  }
+}
+
+async function copyShareText(dateKey, feedbackEl, previewEl) {
+  const user = currentPlayer();
+  if (!user) return;
+
+  const shareText = shareTextForDate(user, dateKey);
+  if (previewEl) {
+    previewEl.textContent = shareText;
+  }
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(shareText);
+    } else {
+      const textarea = document.createElement("textarea");
+      textarea.value = shareText;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "absolute";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+
+    if (feedbackEl) {
+      feedbackEl.textContent = "Copied to clipboard.";
+      feedbackEl.className = "feedback success";
+    }
+  } catch (error) {
+    console.error(error);
+    if (feedbackEl) {
+      feedbackEl.textContent = "Could not copy share text.";
+      feedbackEl.className = "feedback error";
+    }
   }
 }
 
@@ -1328,6 +1413,7 @@ async function handleGuess(event) {
           code,
           score: liveUser.stats.currentPuzzleScore,
           roundsCleared: DAILY_RUN_LENGTH,
+          runDetails: currentRunDetails(liveUser, round.dateKey),
           completed: true,
           failed: false
         });
@@ -1359,6 +1445,7 @@ async function handleGuess(event) {
     code,
     score: finalScore,
     roundsCleared,
+    runDetails: currentRunDetails(user, round.dateKey),
     completed: false,
     failed: true
   });
@@ -1516,6 +1603,7 @@ function showLostScreen(round, finalScore, roundsCleared) {
   });
 
   renderOutlineInto(el.lostCountryOutline, round.code);
+  renderSharePanel(round.dateKey, el.lostSharePreview, el.lostShareFeedback);
 }
 
 function showWinScreen(round, finalScore) {
@@ -1537,6 +1625,7 @@ function showWinScreen(round, finalScore) {
   });
 
   renderOutlineInto(el.winCountryOutline, round.code);
+  renderSharePanel(round.dateKey, el.winSharePreview, el.winShareFeedback);
 }
 
 function renderSidebarOutlines() {
@@ -2225,6 +2314,16 @@ el.dailySelect?.addEventListener("change", (event) => {
 });
 el.lostNewRunButton.addEventListener("click", handleReplayDay);
 el.winNewRunButton.addEventListener("click", handleReplayDay);
+el.lostShareButton?.addEventListener("click", () => {
+  if (state.currentRound?.dateKey) {
+    void copyShareText(state.currentRound.dateKey, el.lostShareFeedback, el.lostSharePreview);
+  }
+});
+el.winShareButton?.addEventListener("click", () => {
+  if (state.currentRound?.dateKey) {
+    void copyShareText(state.currentRound.dateKey, el.winShareFeedback, el.winSharePreview);
+  }
+});
 el.navButtons.forEach((button) => {
   button.addEventListener("click", () => {
     closeAuth();
