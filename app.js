@@ -499,6 +499,7 @@ const state = {
   mapFocusTimer: null,
   outlineRetryTimer: null,
   outlineMetrics: {},
+  achievedCountries: [],
   loadingRound: false,
   authOpen: false,
   selectedDateKey: "",
@@ -531,10 +532,48 @@ function cloneStats(stats = {}) {
   return {
     ...defaultStats(),
     ...stats,
-    countriesSolved: Array.isArray(stats.countriesSolved) ? stats.countriesSolved : [],
+    countriesSolved: Array.isArray(stats.countriesSolved)
+      ? stats.countriesSolved
+          .map((entry) => ({
+            country: entry?.country || "",
+            code: (entry?.code || "").toUpperCase()
+          }))
+          .filter((entry) => entry.country && entry.code)
+      : [],
     latestRun: Array.isArray(stats.latestRun) ? stats.latestRun : [],
     dailyHistory: stats.dailyHistory && typeof stats.dailyHistory === "object" ? stats.dailyHistory : {}
   };
+}
+
+function normalizedSolvedCountries(entries = []) {
+  const seenCodes = new Set();
+
+  return entries.reduce((list, entry) => {
+    const country = entry?.country || "";
+    const code = (entry?.code || "").toUpperCase();
+    if (!country || !code || seenCodes.has(code)) {
+      return list;
+    }
+
+    seenCodes.add(code);
+    list.push({ country, code });
+    return list;
+  }, []);
+}
+
+function syncAchievedCountries(player = currentPlayer()) {
+  const solvedCountries = normalizedSolvedCountries(player?.stats?.countriesSolved);
+  const nextCountries = solvedCountries.map((entry) => ({
+    ...entry,
+    polygon: getWorldPathString(entry.code)
+  }));
+
+  state.achievedCountries = nextCountries;
+  if (player?.stats) {
+    player.stats.countriesSolved = solvedCountries;
+  }
+
+  return nextCountries;
 }
 
 function parseDateKey(dateKey) {
@@ -811,6 +850,7 @@ async function persistProfile(player = currentPlayer()) {
   if (!player) {
     return;
   }
+  syncAchievedCountries(player);
   setAuthenticatedUser({
     ...player,
     guest: false,
@@ -1236,6 +1276,7 @@ async function handleGuess(event) {
     if (!user.stats.countriesSolved.some((entry) => entry.code === code)) {
       user.stats.countriesSolved.push({ country, code });
     }
+    syncAchievedCountries(user);
     user.stats.latestRun.push({
       country,
       code,
@@ -1502,8 +1543,8 @@ function renderSidebarOutlines() {
 
   el.sidebarOutlineGallery.innerHTML = "";
   let missingOutline = false;
-  user.stats.countriesSolved.forEach((entry) => {
-    const outlineSvg = countryOutlineSvg(entry.code);
+  syncAchievedCountries(user).forEach((entry) => {
+    const outlineSvg = countryOutlineSvg(entry);
     if (!outlineSvg) {
       missingOutline = true;
     }
@@ -1564,7 +1605,8 @@ function renderProfile() {
   const user = activeUser();
   if (!user) return;
 
-  renderCountryOutlines(user.stats.countriesSolved);
+  syncAchievedCountries(user);
+  renderCountryOutlines();
 }
 
 function mapOptions() {
@@ -1714,7 +1756,7 @@ function applyUnlockedRegions() {
   const user = activeUser();
   if (!state.mapReady || !user) return;
 
-  const unlockedCodes = user.stats.countriesSolved.map((entry) => entry.code.toUpperCase());
+  const unlockedCodes = syncAchievedCountries(user).map((entry) => entry.code);
   allMapInstances().forEach((mapInstance) => {
     if (typeof mapInstance.setSelectedRegions === "function") {
       mapInstance.setSelectedRegions(unlockedCodes);
@@ -1887,12 +1929,13 @@ function measureCountryPath(code) {
   return metrics;
 }
 
-function renderCountryOutlines(countries) {
+function renderCountryOutlines() {
   if (!state.mapReady) {
-    requestAnimationFrame(() => renderCountryOutlines(countries));
+    requestAnimationFrame(renderCountryOutlines);
     return;
   }
 
+  const countries = state.achievedCountries.slice();
   el.countryOutlineGallery.innerHTML = "";
   if (!countries.length) {
     const empty = document.createElement("div");
@@ -1907,7 +1950,7 @@ function renderCountryOutlines(countries) {
     .slice()
     .sort((a, b) => a.country.localeCompare(b.country))
     .forEach((entry) => {
-      const outlineSvg = countryOutlineSvg(entry.code);
+      const outlineSvg = countryOutlineSvg(entry);
       if (!outlineSvg) {
         missingOutline = true;
       }
@@ -1926,13 +1969,26 @@ function renderCountryOutlines(countries) {
   if (missingOutline) {
     clearTimeout(state.outlineRetryTimer);
     state.outlineRetryTimer = window.setTimeout(() => {
-      renderCountryOutlines(countries);
+      renderCountryOutlines();
     }, 120);
   }
 }
 
-function countryOutlineSvg(code) {
-  const metrics = measureCountryPath(code);
+function countryOutlineSvg(entryOrCode) {
+  const entry =
+    typeof entryOrCode === "string"
+      ? { code: entryOrCode.toUpperCase(), polygon: getWorldPathString(entryOrCode) }
+      : {
+          ...entryOrCode,
+          code: (entryOrCode?.code || "").toUpperCase(),
+          polygon: entryOrCode?.polygon || getWorldPathString(entryOrCode?.code || "")
+        };
+
+  if (!entry.code || !entry.polygon) {
+    return "";
+  }
+
+  const metrics = measureCountryPath(entry.code);
   if (!metrics) {
     return "";
   }
@@ -1945,7 +2001,7 @@ function countryOutlineSvg(code) {
     Math.max(28, metrics.box.height + padding * 2)
   ].join(" ");
 
-  return `<svg viewBox="${viewBox}" role="img" aria-label="${code} outline" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"><path d="${metrics.pathData}"></path></svg>`;
+  return `<svg viewBox="${viewBox}" role="img" aria-label="${entry.code} outline" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"><path d="${entry.polygon}"></path></svg>`;
 }
 
 function drawShareCards() {
